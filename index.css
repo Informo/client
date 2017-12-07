@@ -1,0 +1,16 @@
+
+#loader>div {
+	width: 100%;
+}
+
+
+.informo-article.with-img > div > div {
+	flex: 1;
+}
+.informo-article.with-img .informo-article-image {
+	max-height: 100px;
+	max-width: 50%;
+}
+.informo-article .informo-article-title {
+	font-weight: bold;
+}

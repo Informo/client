@@ -1,8 +1,16 @@
 # Informo frontend
 
+### Build
 
-## Build
-```bash
+```shell
 npm install
-npm run build
+#runs webpack dev server which compile dynamically app/index.js
+npm run start-dev
+#starts the electron
+npm run start
 ```
+
+
+### Notes
+
+based on [electron-livereload-starter](https://github.com/wmira/electron-livereload-starter)

@@ -1,33 +1,25 @@
-const path = require('path');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+var plugins = [];
 
 module.exports = {
-	entry: ['babel-polyfill', './src/index.js'],
-	devtool: 'source-map',
-	module: {
-		rules: [
-			{
-				test: /\.js$/,
-				exclude: /node_modules/,
-				use: {
-					loader: 'babel-loader',
-					options: {
-						presets: ['env', 'flow']
-					}
-				}
-			}
-		]
-	},
- 	output: {
-		filename: 'informo.js',
-		path: path.resolve(__dirname, 'dist')
-	},
-	plugins: [
-		// new UglifyJSPlugin(),
-		new HtmlWebpackPlugin({
-			template: './src/index.html'
-		})
-	]
+    devtool: 'source-map',
+    resolve: {
+        alias: {}
+    },
+    output: {
+        //publicPath is required and needs to be a url
+        publicPath: 'http://localhost:8080/',
+    },
+    plugins: plugins,
+    module: {
+        loaders: [
+            {test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'babel',
+                query: {
+                    presets: ['es2015']
+                }
+            }
+        ]
+    }
 };
-
