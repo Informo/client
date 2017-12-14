@@ -1,14 +1,32 @@
 class Sources {
 	constructor(){
-		this.sources = [];
+		this.sources = {};
 	}
 
 	setSources(sources){
-		this.sources = sources;
+		for (let source of sources) {
+			this.sources[source.className] = {
+				publishers: source.publishers,
+				name: source.name,
+			}
+		}
 	}
 
 	hasSources(){
-		return this.sources.length > 0
+		return Object.keys(this.sources).length > 0
+	}
+
+	canPublish(publisher, className){
+		let cp = false
+
+		for (let p of this.sources[className].publishers) {
+			if (p === publisher) {
+				cp = true;
+				break;
+			}
+		}
+
+		return cp;
 	}
 }
 

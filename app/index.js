@@ -5,7 +5,6 @@ import loader from './loader'
 import informoSources from './sources'
 import * as matrix from './matrix'
 
-let matrixClient;
 const eventPrefix = "network.informo.news.";
 
 
@@ -23,7 +22,16 @@ $( document ).ready(function(){
 	.then((news) => {
 		for(let n of news) {
 			let content = n.content;
-			addArticle(content.headline, null, n.type, content.date, content.content, content.link);
+			if (informoSources.canPublish(n.sender, n.type)) {
+				addArticle(
+					content.headline,
+					null,
+					informoSources.sources[n.type].name,
+					content.date,
+					content.content,
+					content.link
+				);
+			}
 		}
 	})
 	.catch((reason) => {
@@ -41,23 +49,23 @@ function updateSources(){
 	$(".informo-source-link").remove();
 	let appender = $("#sourcelist-append");
 
-	for(let source of informoSources.sources){
+	for(let className in informoSources.sources){
 
-		if(source.className.startsWith(eventPrefix)){
-			let evName = source.className.substr(eventPrefix.length);
+		if(className.startsWith(eventPrefix)){
+			let evName = className.substr(eventPrefix.length);
 
 			let li = document.createElement("li");
 			li.classList.add("informo-source-link");
 
 			let a = document.createElement("a");
 			a.setAttribute("href", "#" + encodeURI(evName));
-			a.appendChild(document.createTextNode(source.name));
+			a.appendChild(document.createTextNode(informoSources.sources[className].name));
 			li.appendChild(a);
 
 			appender.before(li);
 		}
 		else{
-			console.warn("network.informo.sources contains '" + source.className + "' that does not match 'network.informo.news.*' format");
+			console.warn("network.informo.sources contains '" + className + "' that does not match 'network.informo.news.*' format");
 		}
 	}
 }
@@ -71,7 +79,7 @@ function clearArticles(){
 	$("#article-list > *").remove();
 }
 
-function addArticle(title, image, source, date, content, href = null){
+function addArticle(title, image, source, ts, content, href = null){
 	let article = $(`
 		<li class="informo-article">
 			<div class="collapsible-header">
@@ -100,11 +108,15 @@ function addArticle(title, image, source, date, content, href = null){
 	else{
 		article.find(".informo-article-image").remove();
 	}
+
+	let date = new Date(ts*1000);
+	$(content).find("script").remove()
+
 	article.find(".informo-article-anchor").attr("href", href);
 	article.find(".informo-article-title").text(title);
 	article.find(".informo-article-source").text(source);
-	article.find(".informo-article-date").text(date);
-	article.find(".informo-article-content").text(content);
+	article.find(".informo-article-date").text(date.toString());
+	article.find(".informo-article-content").html(content);
 
-	$("#article-list").append(article);
+	$("#article-list").prepend(article);
 }

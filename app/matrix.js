@@ -4,7 +4,7 @@ import informoSources from './sources'
 import MatrixClient from './matrix/client'
 
 const homeserverURL = 'https://matrix.org';
-const roomAlias = '#informo:matrix.org';
+const roomAlias = '#informo-test:matrix.org';
 
 var mxClient;
 var mxRoomID;
@@ -73,14 +73,17 @@ export function loadInformo() {
 }
 
 // TODO: Optional parameter to get news of a specific source
-export function getNews() {
+export function getNews(source = "") {
 	return new Promise((resolve, reject) => {
 
 		loader.update(80, "Fetching latest news");
-		let filter = {types: []}
+		let filter = {types: [],senders: []}
 
-		for(let source of informoSources.sources) {
-			filter.types.push(source.className)
+		for(let className in informoSources.sources) {
+			filter.types.push(className)
+			for(let publisher of informoSources.sources[className].publishers) {
+				filter.senders.push(publisher)
+			}
 		}
 
 		resolve(mxClient.getMessages(mxRoomID, filter, 30));
