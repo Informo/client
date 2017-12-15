@@ -15,6 +15,7 @@ const eventPrefix = "network.informo.news.";
 $( document ).ready(function(){
 	$("#navbar-left-button").sideNav();
 	$('.collapsible').collapsible();
+	$('.modal').modal();
 
 	matrix.initMatrixClient()
 	.then(matrix.loadInformo)
@@ -111,10 +112,10 @@ function addArticle(title, image, source, ts, content, href = null){
 		<li class="informo-article">
 			<div class="collapsible-header">
 				<div>
-					<div class="flow-text"><span class="informo-article-title">{{TITLE}}</span><a class="informo-article-anchor" href="#"><i class="material-icons">link</i></a></div>
-					<div class="informo-article-source">
+					<div class="flow-text"><span class="informo-article-title">{{TITLE}}</span><a class="informo-article-anchor" href=""><i class="material-icons">link</i></a></div>
+					<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)">
 						{{SOURCE}}
-					</div>
+					</a>
 					<div class="informo-article-date">
 						{{DATE}}
 					</div>
@@ -139,11 +140,25 @@ function addArticle(title, image, source, ts, content, href = null){
 	let date = new Date(ts*1000);
 	$(content).find("script").remove()
 
-	article.find(".informo-article-anchor").attr("href", href);
+	// article.find(".informo-article-anchor").attr("href", ); TODO add a link to this article on informo
 	article.find(".informo-article-title").text(title);
 	article.find(".informo-article-source").text(source);
+	article.find(".informo-article-source").onclick
+
+	article.find(".informo-article-source").attr("href", href);
 	article.find(".informo-article-date").text(date.toString());
 	article.find(".informo-article-content").html(content);
 
 	$("#article-list").prepend(article);
+}
+
+
+document.externalLink = function(elmt){
+	const modal = $("#external-link-confirm");
+	modal.find(".link-target").text($(elmt).attr("href"));
+
+	modal.find(".follow-link-button").attr("href", $(elmt).attr("href"));
+
+	$("#external-link-confirm").modal('open');
+	return false;
 }
