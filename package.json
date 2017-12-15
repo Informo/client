@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "webpack app/index.js dist/bundle.js && electron main.js",
-    "start-dev": "webpack-dev-server --inline --watch --hot app/index.js"
+    "start-dev": "webpack-dev-server --inline --watch --output-file dist/bundle.js --hot app/index.js"
   },
   "repository": {
     "type": "git",
