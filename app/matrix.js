@@ -5,8 +5,9 @@ import MatrixClient from './matrix/client'
 
 const homeserverURL = 'https://matrix.org';
 const roomAlias = '#informo-test:matrix.org';
-const mxcURLRegexp = /mxc:\/\/([^\/]+)\/([^"'\/]+)/;
-const mxcURLRegexpGen = new RegExp(mxcURLRegexp, 'g')
+const mxcURLRegexpStr = "/mxc:\/\/([^\/]+)\/([^\"'\/]+)/";
+const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, '');
+const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, 'g')
 
 var mxClient;
 var mxRoomID;
@@ -120,7 +121,7 @@ export function getNews(sourceClassName = null) {
 }
 
 function getPartsFromMXCURL(mxcURL) {
-	let parts = mxcURL.match(mxcURLRegexp)
+	let parts = mxcURL.match(mxcURLRegexpLoc)
 	return {
 		serverName: parts[1],
 		mediaID: parts[2],
