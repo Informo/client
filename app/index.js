@@ -41,6 +41,8 @@ function displayNews() {
 
 	return matrix.getNews(currentSource)
 	.then((news) => {
+		news.sort((a, b) => a.content.date - b.content.date)
+
 		loader.update(100);
 		for(let n of news) {
 			let content = n.content;
@@ -143,5 +145,5 @@ function addArticle(title, image, source, ts, content, href = null){
 	article.find(".informo-article-date").text(date.toString());
 	article.find(".informo-article-content").html(content);
 
-	$("#article-list").append(article);
+	$("#article-list").prepend(article);
 }

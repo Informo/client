@@ -92,7 +92,10 @@ export default class MatrixClient {
 				this.homeserverURL,
 				"/_matrix/client/r0/rooms/" + encodeURIComponent(roomID) + "/messages",
 				this.accessToken,
-				{filter: JSON.stringify(filter)},
+				{
+					filter: JSON.stringify(filter),
+					limit: lim,
+				},
 			));
 		})
 		.then((resp) => {
@@ -104,7 +107,8 @@ export default class MatrixClient {
 				{
 					dir: "b",
 					from: resp.start,
-					filter: JSON.stringify(filter)
+					filter: JSON.stringify(filter),
+					limit: lim,
 				},
 			);
 		})
