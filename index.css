@@ -3,6 +3,9 @@
 	width: 100%;
 }
 
+#navbar-left > #sourcelist-load {
+	text-align: center;
+}
 
 .informo-article.with-img > div > div {
 	flex: 1;

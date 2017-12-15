@@ -76,6 +76,11 @@ function updateSources(){
 	$(".informo-source-link").remove();
 	let appender = $("#sourcelist-append");
 
+	let load = $("#sourcelist-load");
+	if (load.css("display") != "none") {
+		load.css("display", "none");
+	}
+
 	for(let className in informoSources.sources){
 
 		if(className.startsWith(eventPrefix)){
