@@ -15,8 +15,6 @@ export class Loader {
 	}
 
 	refreshLoadingProgress(reset = false){
-		console.log(this.message);
-		console.log(this.percentage);
 		if(this.percentage == 100) {
 			$("#loader").css("display", "none");
 			$("#main-content").css("display", "block");

@@ -43,7 +43,7 @@ function displayNews() {
 			if (informoSources.canPublish(n.sender, n.type)) {
 				addArticle(
 					content.headline,
-					null,
+					content.thumbnail,
 					informoSources.sources[n.type].name,
 					content.date,
 					content.content,
@@ -139,5 +139,5 @@ function addArticle(title, image, source, ts, content, href = null){
 	article.find(".informo-article-date").text(date.toString());
 	article.find(".informo-article-content").html(content);
 
-	$("#article-list").prepend(article);
+	$("#article-list").append(article);
 }

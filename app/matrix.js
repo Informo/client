@@ -5,6 +5,8 @@ import MatrixClient from './matrix/client'
 
 const homeserverURL = 'https://matrix.org';
 const roomAlias = '#informo-test:matrix.org';
+const mxcURLRegexp = /mxc:\/\/([^\/]+)\/([^"'\/]+)/;
+const mxcURLRegexpGen = new RegExp(mxcURLRegexp, 'g')
 
 var mxClient;
 var mxRoomID;
@@ -72,7 +74,6 @@ export function loadInformo() {
 	})
 }
 
-// TODO: Optional parameter to get news of a specific source
 export function getNews(sourceClassName = null) {
 	return new Promise((resolve, reject) => {
 		let filter = {types: [],senders: []}
@@ -93,4 +94,35 @@ export function getNews(sourceClassName = null) {
 
 		resolve(mxClient.getMessages(mxRoomID, filter, 30));
 	})
+	.then((news) => {
+		let updatedNews = [];
+		for (let n of news) {
+			n.thumbnail = null
+			let medias = n.content.content.match(mxcURLRegexpGen);
+			if (medias) {
+				for (let m of medias) {
+					let parts = getPartsFromMXCURL(m)
+					let dlURL = mxClient.homeserverURL
+						+ "/_matrix/media/r0/download/" + parts.serverName
+						+ "/" + parts.mediaID;
+					n.content.content = n.content.content.replace(m, dlURL);
+				}
+				let thumbnailParts = getPartsFromMXCURL(medias[0])
+				n.content.thumbnail = mxClient.homeserverURL
+					+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
+					+ "/" + thumbnailParts.mediaID;
+			}
+			updatedNews.push(n)
+		}
+
+		return updatedNews
+	});
+}
+
+function getPartsFromMXCURL(mxcURL) {
+	let parts = mxcURL.match(mxcURLRegexp)
+	return {
+		serverName: parts[1],
+		mediaID: parts[2],
+	};
 }
