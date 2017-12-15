@@ -5,7 +5,7 @@ import MatrixClient from './matrix/client'
 
 const homeserverURL = 'https://matrix.org';
 const roomAlias = '#informo-test:matrix.org';
-const mxcURLRegexpStr = "/mxc:\/\/([^\/]+)\/([^\"'\/]+)/";
+const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
 const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, '');
 const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, 'g')
 
