@@ -1,5 +1,9 @@
 "use strict;"
 
+import Hammer from 'hammerjs'
+import $ from 'jquery'
+import 'materialize-css'
+
 import storage from './storage'
 import loader from './loader'
 import informoSources from './sources'
