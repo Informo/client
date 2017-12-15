@@ -64,7 +64,7 @@ function getCurrentSource() {
 	let currentURL = window.location.href;
 	let hashIndex = currentURL.indexOf("#");
 
-	if (hashIndex < 0) {
+	if (hashIndex < 0 || !currentURL.substr(hashIndex+1)) {
 		return null
 	}
 
