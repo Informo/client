@@ -14,12 +14,30 @@ $( document ).ready(function(){
 
 	matrix.initMatrixClient()
 	.then(matrix.loadInformo)
+	.then(updateSources)
 	.then(() => {
-		loader.update(100);
-		updateSources();
+		loader.update(80, "Fetching latest news");
+		displayNews();
 	})
-	.then(matrix.getNews)
+	.catch((reason) => {
+		console.error(reason);
+		loader.update(0, reason)
+	})
+
+	$(window).bind('hashchange', () => {
+		clearArticles();
+		loader.reset();
+		loader.update(50, "Fetching news")
+		displayNews()
+	});
+})
+
+function displayNews() {
+	let currentSource = getCurrentSource()
+
+	return matrix.getNews(currentSource)
 	.then((news) => {
+		loader.update(100);
 		for(let n of news) {
 			let content = n.content;
 			if (informoSources.canPublish(n.sender, n.type)) {
@@ -34,16 +52,18 @@ $( document ).ready(function(){
 			}
 		}
 	})
-	.catch((reason) => {
-		console.error(reason);
-		loader.update(0, reason)
-	})
+}
 
-	$(window).bind('hashchange', function() {
-		console.log("HashChange", window.location);
-		//TODO: query getEventFilter() events and reload articles
-	});
-})
+function getCurrentSource() {
+	let currentURL = window.location.href;
+	let hashIndex = currentURL.indexOf("#");
+
+	if (hashIndex < 0) {
+		return null
+	}
+
+	return eventPrefix + currentURL.substr(hashIndex+1);
+}
 
 function updateSources(){
 	$(".informo-source-link").remove();
@@ -60,6 +80,7 @@ function updateSources(){
 			let a = document.createElement("a");
 			a.setAttribute("href", "#" + encodeURI(evName));
 			a.appendChild(document.createTextNode(informoSources.sources[className].name));
+			a.addEventListener("click", () => $('#navbar-left-button').sideNav('hide'))
 			li.appendChild(a);
 
 			appender.before(li);

@@ -14,11 +14,18 @@ export class Loader {
 		}
 	}
 
-	refreshLoadingProgress(){
+	refreshLoadingProgress(reset = false){
+		console.log(this.message);
+		console.log(this.percentage);
 		if(this.percentage == 100) {
 			$("#loader").css("display", "none");
 			$("#main-content").css("display", "block");
 			this.active = false;
+		}
+
+		if(reset) {
+			$("#loader").css("display", "block");
+			$("#main-content").css("display", "none");
 		}
 
 		if(this.message) {
@@ -26,6 +33,14 @@ export class Loader {
 		}
 
 		$("#loader-progress-bar").css("width", this.percentage + "%");
+	}
+
+	reset(){
+		this.message = "";
+		this.percentage = 0;
+		this.active = true;
+
+		this.refreshLoadingProgress(true);
 	}
 }
 

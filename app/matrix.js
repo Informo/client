@@ -73,16 +73,21 @@ export function loadInformo() {
 }
 
 // TODO: Optional parameter to get news of a specific source
-export function getNews(source = "") {
+export function getNews(sourceClassName = null) {
 	return new Promise((resolve, reject) => {
-
-		loader.update(80, "Fetching latest news");
 		let filter = {types: [],senders: []}
 
-		for(let className in informoSources.sources) {
-			filter.types.push(className)
-			for(let publisher of informoSources.sources[className].publishers) {
+		if(sourceClassName) {
+			filter.types.push(sourceClassName)
+			for(let publisher of informoSources.sources[sourceClassName].publishers) {
 				filter.senders.push(publisher)
+			}
+		} else {
+			for(let className in informoSources.sources) {
+				filter.types.push(className)
+				for(let publisher of informoSources.sources[className].publishers) {
+					filter.senders.push(publisher)
+				}
 			}
 		}
 
