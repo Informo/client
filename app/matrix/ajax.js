@@ -25,6 +25,9 @@ export function req(method, homeserverURL, path, accessToken, body = {}) {
 			url: homeserverURL + path,
 			dataType: "json",
 			data: bodyStr,
+		})
+		.catch(() => {
+			throw "Could not connect to the Informo network"
 		}));
 	});
 }
