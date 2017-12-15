@@ -40,6 +40,15 @@ export class Loader {
 
 		this.refreshLoadingProgress(true);
 	}
+
+	determinate(){
+		$("#loader-progress-bar").attr("class", "determinate");
+	}
+
+	indeterminate(){
+		$("#loader-progress-bar").attr("class", "indeterminate");
+	}
+
 }
 
 export default (new Loader)

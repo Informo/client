@@ -31,8 +31,8 @@ $( document ).ready(function(){
 
 	$(window).bind('hashchange', () => {
 		clearArticles();
+		loader.indeterminate()
 		loader.reset();
-		loader.update(50, "Fetching news")
 		displayNews()
 	});
 })
