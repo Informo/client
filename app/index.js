@@ -138,7 +138,6 @@ function addArticle(title, image, source, ts, content, href = null){
 	}
 
 	let date = new Date(ts*1000);
-	$(content).find("script").remove()
 
 	// article.find(".informo-article-anchor").attr("href", ); TODO add a link to this article on informo
 	article.find(".informo-article-title").text(title);
@@ -148,6 +147,8 @@ function addArticle(title, image, source, ts, content, href = null){
 	article.find(".informo-article-source").attr("href", href);
 	article.find(".informo-article-date").text(date.toString());
 	article.find(".informo-article-content").html(content);
+	article.find(".informo-article-content").find("script").remove();
+	article.find(".informo-article-content").find("a").attr("onclick", "return externalLink(this)");
 
 	$("#article-list").prepend(article);
 }
