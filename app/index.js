@@ -50,6 +50,8 @@ function displayNews() {
 			if (informoSources.canPublish(n.sender, n.type)) {
 				addArticle(
 					content.headline,
+					content.description,
+					content.author,
 					content.thumbnail,
 					informoSources.sources[n.type].name,
 					content.date,
@@ -112,17 +114,21 @@ function clearArticles(){
 	$("#article-list > *").remove();
 }
 
-function addArticle(title, image, source, ts, content, href = null){
+function addArticle(title, description, author, image, source, ts, content, href = null){
 	let article = $(`
 		<li class="informo-article">
 			<div class="collapsible-header">
 				<div>
 					<div class="flow-text"><span class="informo-article-title">{{TITLE}}</span><a class="informo-article-anchor" href=""><i class="material-icons">link</i></a></div>
-					<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)">
-						{{SOURCE}}
-					</a>
-					<div class="informo-article-date">
-						{{DATE}}
+					<div class="informo-article-publication">
+						<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)">
+							{{SOURCE}}
+						</a>
+						<span class="informo-article-date">{{DATE}}</span>
+						<span class="informo-article-author">{{AUTHOR}}</span>
+					</div>
+					<div class="informo-article-description">
+						{{DESCRIPTION}}
 					</div>
 				</div>
 				<img class="informo-article-image" src="{{SRC}}">
@@ -142,15 +148,29 @@ function addArticle(title, image, source, ts, content, href = null){
 		article.find(".informo-article-image").remove();
 	}
 
+	if (author) {
+		article.find(".informo-article-author").text("by " + author);
+	} else {
+		article.find(".informo-article-author").remove();
+	}
+
 	let date = new Date(ts*1000);
+
+	if (date) {
+		article.find(".informo-article-date").text(" - " + date.toLocaleDateString());
+	} else {
+		article.find(".informo-article-date").remove();
+	}
 
 	// article.find(".informo-article-anchor").attr("href", ); TODO add a link to this article on informo
 	article.find(".informo-article-title").text(title);
 	article.find(".informo-article-source").text(source);
-	article.find(".informo-article-source").onclick
-
 	article.find(".informo-article-source").attr("href", href);
-	article.find(".informo-article-date").text(date.toString());
+
+	article.find(".informo-article-description").html(description);
+	article.find(".informo-article-description").find("script").remove();
+	article.find(".informo-article-description").find("a").attr("onclick", "return externalLink(this)");
+
 	article.find(".informo-article-content").html(content);
 	article.find(".informo-article-content").find("script").remove();
 	article.find(".informo-article-content").find("a").attr("onclick", "return externalLink(this)");

@@ -17,3 +17,7 @@
 .informo-article .informo-article-title {
 	font-weight: bold;
 }
+
+.informo-article .informo-article-description {
+	padding: 10px 7px 0 0;
+}
