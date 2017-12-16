@@ -170,7 +170,8 @@ function addArticle(title, description, author, image, source, ts, content, href
 	let date = new Date(ts*1000);
 
 	if (date) {
-		article.find(".informo-article-date").text(" - " + date.toLocaleDateString());
+		let dateStr = ` - ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+		article.find(".informo-article-date").text(dateStr);
 	} else {
 		article.find(".informo-article-date").remove();
 	}
