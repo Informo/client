@@ -10,6 +10,7 @@ import informoSources from './sources'
 import * as matrix from './matrix'
 
 const eventPrefix = "network.informo.news.";
+const homeserverURL = 'https://matrix.org';
 
 
 $( document ).ready(function(){
@@ -17,7 +18,9 @@ $( document ).ready(function(){
 	$('.collapsible').collapsible();
 	$('.modal').modal();
 
-	matrix.initMatrixClient()
+	updateEndpointUrl(homeserverURL);
+
+	matrix.initMatrixClient(homeserverURL)
 	.then(matrix.loadInformo)
 	.then(updateSources)
 	.then(() => {
@@ -36,6 +39,10 @@ $( document ).ready(function(){
 		displayNews()
 	});
 })
+
+function updateEndpointUrl(url){
+	$("#navbar-left .endpoint-url").text(url);
+}
 
 function displayNews() {
 	let currentSource = getCurrentSource()

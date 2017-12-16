@@ -14,9 +14,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	</head>
 	<body>
-		<nav class="green">
+		<nav class="informo-bg-green">
 			<div class="nav-wrapper">
-				<a class="brand-logo center" href="#">Informo</a>
+				<a class="brand-logo center" href="#"><img src="static/logo-full-white-128.png"/></a>
 				<ul class="left">
 					<li><a id="navbar-left-button" href="#" data-activates="navbar-left"><i class="material-icons">menu</i></a></li>
 					<li>Feeds list</li>
@@ -26,6 +26,13 @@
 
 
 		<ul id="navbar-left" class="side-nav show-on-medium-and-up">
+			<li class="navbar-header informo-bg-green">
+				<div class="center">
+					<img src="static/logo-round-white-128.png">
+				</div>
+				<strong>Current endpoint URL</strong>
+				<code class="endpoint-url">Not connected</code>
+			</li>
 			<li><a class="subheader">Feeds</a></li>
 			<li id="sourcelist-load">
 				<div class="preloader-wrapper small active">

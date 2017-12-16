@@ -3,7 +3,6 @@ import loader from './loader'
 import informoSources from './sources'
 import MatrixClient from './matrix/client'
 
-const homeserverURL = 'https://matrix.org';
 const roomAlias = '#informo-test:matrix.org';
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
 const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, '');
@@ -12,7 +11,7 @@ const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, 'g')
 var mxClient;
 var mxRoomID;
 
-export function initMatrixClient(){
+export function initMatrixClient(homeserverURL){
 	return new Promise((resolve, reject) => {
 		loader.update(20, "Creating session at " + homeserverURL);
 
