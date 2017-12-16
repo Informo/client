@@ -95,14 +95,20 @@ function updateSources(){
 		if(className.startsWith(eventPrefix)){
 			let evName = className.substr(eventPrefix.length);
 
-			let li = document.createElement("li");
-			li.classList.add("informo-source-link");
+			let li = $(`
+				<li class="informo-source-link">
+					<a href="{{LINK}}"><span class="link">{{NAME}}</span><span class="new badge informo-bg-green" data-badge-caption="unread">{{UNREAD_CNT}}</span></a>
+				</li>`);
 
-			let a = document.createElement("a");
-			a.setAttribute("href", "#" + encodeURI(evName));
-			a.appendChild(document.createTextNode(informoSources.sources[className].name));
-			a.addEventListener("click", () => $('#navbar-left-button').sideNav('hide'))
-			li.appendChild(a);
+			li.find("a")
+				.attr("href", "#" + encodeURI(evName))
+				.find(".link")
+					.text(informoSources.sources[className].name);
+
+
+			li.find(".badge")
+				.text(informoSources.sources[className].unread)
+				.addClass(informoSources.sources[className].unread === 0 ? "hide" : null);
 
 			appender.before(li);
 		}
@@ -171,16 +177,17 @@ function addArticle(title, description, author, image, source, ts, content, href
 
 	// article.find(".informo-article-anchor").attr("href", ); TODO add a link to this article on informo
 	article.find(".informo-article-title").text(title);
-	article.find(".informo-article-source").text(source);
-	article.find(".informo-article-source").attr("href", href);
+	article.find(".informo-article-source")
+		.text(source)
+		.attr("href", href);
 
-	article.find(".informo-article-description").html(description);
-	article.find(".informo-article-description").find("script").remove();
-	article.find(".informo-article-description").find("a").attr("onclick", "return externalLink(this)");
-
-	article.find(".informo-article-content").html(content);
-	article.find(".informo-article-content").find("script").remove();
-	article.find(".informo-article-content").find("a").attr("onclick", "return externalLink(this)");
+	function setSanitizedHtmlContent(element, content){
+		element.html(content);
+		element.find("script").remove();
+		element.find("a").attr("onclick", "return externalLink(this)");
+	}
+	setSanitizedHtmlContent(article.find(".informo-article-description"), description);
+	setSanitizedHtmlContent(article.find(".informo-article-content"), content);
 
 	$("#article-list").prepend(article);
 }

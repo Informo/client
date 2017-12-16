@@ -8,8 +8,13 @@ class Sources {
 			this.sources[source.className] = {
 				publishers: source.publishers,
 				name: source.name,
+				unread: 0,//TODO
 			}
 		}
+	}
+
+	setSourceUnreadCount(sourceClassName, count){
+		this.sources[sourceClassName].unread = count;
 	}
 
 	hasSources(){
