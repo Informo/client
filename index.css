@@ -22,6 +22,10 @@
 	padding: 1em 1em 0 0;
 }
 
+.informo-article .informo-article-content img {
+	max-width: 100%;
+}
+
 .informo-bg-green {
 	background-color: #417D44;
 	color: #fff;

@@ -144,7 +144,7 @@ function addArticle(title, description, author, image, source, ts, content, href
 						{{DESCRIPTION}}
 					</div>
 				</div>
-				<img class="informo-article-image" src="{{SRC}}">
+				<img class="informo-article-image hide-on-small-only" src="{{SRC}}">
 			</div>
 			<div class="collapsible-body">
 				<p class="informo-article-content">
