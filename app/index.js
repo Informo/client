@@ -14,8 +14,19 @@ const homeserverURL = 'https://matrix.org';
 
 
 $( document ).ready(function(){
-	$("#navbar-left-button").sideNav();
-	$('.collapsible').collapsible();
+	$("#navbar-left-button").sideNav({closeOnClick: true});
+	$('.collapsible').collapsible(
+		{
+			onOpen: function(el) {
+				// $("html").scrollTop( $(el).offset().top );
+				window.scroll({
+					top: $(el).offset().top,
+					left: 0,
+					behavior: 'smooth'
+				});
+
+			}
+		});
 	$('.modal').modal();
 
 	updateEndpointUrl(homeserverURL);
