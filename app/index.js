@@ -195,7 +195,13 @@ function addArticle(title, description, author, image, source, ts, content, href
 
 document.externalLink = function(elmt){
 	const modal = $("#external-link-confirm");
-	modal.find(".link-target").text($(elmt).attr("href"));
+	const linkTarget = $(elmt).attr("href");
+	modal.find(".link-target").text(linkTarget);
+
+	if(new URL(linkTarget).protocol === "https:")
+		modal.find(".http-warning").addClass("hide");
+	else
+		modal.find(".http-warning").removeClass("hide");
 
 	modal.find(".follow-link-button").attr("href", $(elmt).attr("href"));
 
