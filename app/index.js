@@ -141,23 +141,29 @@ function clearArticles(){
 function addArticle(title, description, author, image, source, ts, content, href = null){
 	let article = $(`
 		<li class="informo-article">
-			<div class="collapsible-header">
+			<div class="collapsible-header hoverable">
 				<div>
-					<div class="flow-text"><span class="informo-article-title">{{TITLE}}</span><a class="informo-article-anchor" href=""><i class="material-icons">link</i></a></div>
+					<div class="flow-text"><span class="informo-article-title">{{TITLE}}</span></div>
 					<div class="informo-article-publication">
-						<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)">
-							{{SOURCE}}
-						</a>
-						<span class="informo-article-date">{{DATE}}</span>
 						<span class="informo-article-author">{{AUTHOR}}</span>
+						<span class="informo-article-source">{{SOURCE}}</span>
+						-
+						<span class="informo-article-date">{{DATE}}</span>
 					</div>
 					<div class="informo-article-description">
 						{{DESCRIPTION}}
 					</div>
 				</div>
-				<img class="informo-article-image hide-on-small-only" src="{{SRC}}">
+				<div class="informo-article-image hide-on-small-only valign-wrapper">
+					<img src="{{SRC}}">
+				</div>
+
 			</div>
 			<div class="collapsible-body">
+				<div class="informo-article-details informo-bg-green-light">
+					<a class="informo-article-anchor" href="{{LINK}}"><i class="material-icons">link</i> Informo article link</a>
+					<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)"><i class="material-icons">open_in_new</i> Original article</a>
+				</div>
 				<p class="informo-article-content">
 
 				</p>
@@ -166,32 +172,32 @@ function addArticle(title, description, author, image, source, ts, content, href
 
 	if(image && image !== null){
 		article.addClass("with-img");
-		article.find(".informo-article-image").attr("src", image);
+		article.find(".informo-article-image img").attr("src", image);
 	}
 	else{
 		article.find(".informo-article-image").remove();
 	}
 
+	// Author
 	if (author) {
-		article.find(".informo-article-author").text("by " + author);
+		article.find(".informo-article-author").html("by <em>" + author + "</em> for");
 	} else {
 		article.find(".informo-article-author").remove();
 	}
-
+	// Source
+	article.find(":not(a).informo-article-source")
+		.text(source)
+	// Date
 	let date = new Date(ts*1000);
-
 	if (date) {
-		let dateStr = ` - ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
-		article.find(".informo-article-date").text(dateStr);
+		article.find(".informo-article-date").text(`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`);
 	} else {
 		article.find(".informo-article-date").remove();
 	}
 
-	// article.find(".informo-article-anchor").attr("href", ); TODO add a link to this article on informo
+	article.find(".informo-article-anchor").attr("href", "#"); //TODO add a link to this article on informo
 	article.find(".informo-article-title").text(title);
-	article.find(".informo-article-source")
-		.text(source)
-		.attr("href", href);
+	article.find("a.informo-article-source").attr("href", href);
 
 	function setSanitizedHtmlContent(element, content){
 		element.html(content);
