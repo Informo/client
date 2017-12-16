@@ -203,7 +203,7 @@ document.externalLink = function(elmt){
 	else
 		modal.find(".http-warning").removeClass("hide");
 
-	modal.find(".follow-link-button").attr("href", $(elmt).attr("href"));
+	modal.find(".follow-link-button").attr("href", linkTarget);
 
 	$("#external-link-confirm").modal('open');
 	return false;
