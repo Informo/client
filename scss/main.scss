@@ -1,9 +1,7 @@
 
-
-// @import "~materialize-css/sass/materialize.scss";
-
-
-
+$roboto-font-path: "fonts/roboto/";
+@import "~materialize-css/sass/materialize.scss";
+@import "~material-design-icons/iconfont/material-icons.css";
 
 #loader>div {
 	width: 100%;

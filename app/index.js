@@ -155,7 +155,7 @@ function addArticle(title, description, author, image, source, ts, content, href
 					</div>
 				</div>
 				<div class="informo-article-image hide-on-small-only valign-wrapper">
-					<img src="{{SRC}}">
+					<img src="">
 				</div>
 
 			</div>
