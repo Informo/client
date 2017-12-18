@@ -18,17 +18,7 @@ $( document ).ready(function(){
 
 
 	$("#navbar-left-button").sideNav({closeOnClick: true});
-	$('#article-list').collapsible({
-		onOpen: function(el) {
-			setTimeout(function() {
-				window.scroll({
-					top: $(el).offset().top - navBarHeight,
-					left: 0,
-					behavior: 'smooth'
-				})
-			}, 360);
-		}
-	});
+	$('#article-list').collapsible();
 	$('.modal').modal();
 
 	updateEndpointUrl(homeserverURL);
