@@ -14,19 +14,21 @@ const homeserverURL = 'https://matrix.org';
 
 
 $( document ).ready(function(){
+	const navBarHeight = 64;
+
+
 	$("#navbar-left-button").sideNav({closeOnClick: true});
-	$('.collapsible').collapsible(
-		{
-			onOpen: function(el) {
-				// $("html").scrollTop( $(el).offset().top );
+	$('#article-list').collapsible({
+		onOpen: function(el) {
+			setTimeout(function() {
 				window.scroll({
-					top: $(el).offset().top,
+					top: $(el).offset().top - navBarHeight,
 					left: 0,
 					behavior: 'smooth'
-				});
-
-			}
-		});
+				})
+			}, 360);
+		}
+	});
 	$('.modal').modal();
 
 	updateEndpointUrl(homeserverURL);
