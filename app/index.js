@@ -150,7 +150,7 @@ function addArticle(title, description, author, image, source, ts, content, href
 						-
 						<span class="informo-article-date">{{DATE}}</span>
 					</div>
-					<div class="informo-article-description">
+					<div class="informo-article-intro">
 						{{DESCRIPTION}}
 					</div>
 				</div>
@@ -204,7 +204,7 @@ function addArticle(title, description, author, image, source, ts, content, href
 		element.find("script").remove();
 		element.find("a").attr("onclick", "return externalLink(this)");
 	}
-	setSanitizedHtmlContent(article.find(".informo-article-description"), description);
+	setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
 	setSanitizedHtmlContent(article.find(".informo-article-content"), content);
 
 	$("#article-list").prepend(article);

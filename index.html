@@ -5,23 +5,28 @@
 		<title>Informo client</title>
 		<link rel="stylesheet" href="dist/style.css" media="screen,projection">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<link rel="icon" type="image/png" href="static/img/logo-round-colored-256.png"/>
 	</head>
 	<body>
-		<nav class="informo-bg-green">
-			<div class="nav-wrapper">
-				<a class="brand-logo center" href="#"><img src="static/img/logo-full-white-128.png"/></a>
-				<ul class="left">
-					<li><a id="navbar-left-button" href="#" data-activates="navbar-left"><i class="material-icons">menu</i></a></li>
-					<li>Feeds list</li>
-				</ul>
-			</div>
-		</nav>
+		<div class="navbar-fixed">
+			<nav class="informo-bg-green">
+				<div class="nav-wrapper">
+					<a class="brand-logo center" href="#">
+						<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
+					</a>
+					<ul class="left hide-on-large-only">
+						<li><a id="navbar-left-button" href="#" data-activates="navbar-left"><i class="material-icons">menu</i></a></li>
+						<li>Feeds list</li>
+					</ul>
+				</div>
+			</nav>
+		</div>
 
 
 		<ul id="navbar-left" class="side-nav show-on-medium-and-up">
 			<li class="navbar-header informo-bg-green">
 				<div class="center">
-					<img src="static/img/logo-round-white-128.png">
+					<img src="static/img/logo-full-white-128.png">
 				</div>
 				<strong>Current endpoint URL</strong><br/>
 				<code class="endpoint-url">Not connected</code>
@@ -44,18 +49,18 @@
 			<li><div class="divider"></div></li>
 		</ul>
 
-		<div id="loader" class="container valign-wrapper center-align">
-			<div>
-				<span id="loader-text" class="flow-text">Loading page...</span>
-				<div class="progress">
-					<div id="loader-progress-bar" class="determinate" style="width: 0%"></div>
+		<main id="main-container">
+			<div id="loader" class="container valign-wrapper center-align">
+				<div>
+					<span id="loader-text" class="flow-text">Loading page...</span>
+					<div class="progress">
+						<div id="loader-progress-bar" class="determinate" style="width: 0%"></div>
+					</div>
 				</div>
 			</div>
-		</div>
-
-
-		<main id="main-content" class="container" style="display: none">
-			<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
+			<div id="main-content" class="container" style="display: none">
+				<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
+			</div>
 		</main>
 
 

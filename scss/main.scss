@@ -1,4 +1,9 @@
 
+$primary-color: #417D44;
+$primary-color-light: #CAF0CC;
+$primary-color-dark: darken($primary-color, 30%);
+
+
 $roboto-font-path: "fonts/roboto/";
 @import "~materialize-css/sass/materialize.scss";
 @import "~material-design-icons/iconfont/material-icons.css";
@@ -7,67 +12,98 @@ $roboto-font-path: "fonts/roboto/";
 	width: 100%;
 }
 
-#navbar-left > #sourcelist-load {
-	text-align: center;
+
+nav {
+	.brand-logo img {
+		height: $navbar-height;
+	}
 }
 
-.informo-article.with-img .collapsible-header > div:first-child {
-	flex: 1;
+#navbar-left {
+	> #sourcelist-load {
+		text-align: center;
+	}
+	.navbar-header {
+		line-height: 1.5em;
+		padding: 0.5em;
+		img {
+			max-width: 80%;
+		}
+	}
 }
-.informo-article.with-img .informo-article-image {
-	max-width: 25%;
-	margin: -15px -15px -15px 0;
-}
-.informo-article.with-img .informo-article-image img {
-	max-height: 200px;
-	max-width: 100%;
-}
-.informo-article .informo-article-title {
-	font-weight: bold;
+@media #{$large-and-up} {
+	#navbar-left {
+		z-index: 996;
+		transform: translateX(0) !important;
+		// margin-top: $navbar-height;
+
+		//          x   y   blur size
+		box-shadow: 0px 5px 3px 3px rgba(0, 0, 0, 0.14);
+	}
+	.navbar-fixed {
+		margin-left: 300px;
+		nav {
+			width: calc(100% - 300px);
+			box-shadow: 5px 2px 3px 3px rgba(0, 0, 0, 0.14);
+		}
+	}
+	#main-container, .loader {
+		margin-left: 300px;
+	}
+
 }
 
-.informo-article .informo-article-details {
-	margin: -30px -30px 0 -30px;
-	padding: 1em;
-}
-.informo-article .informo-article-details > * {
-	padding: 0 1em;
-}
-.informo-article .informo-article-details i {
-	vertical-align: middle;
-}
+.informo-article {
+	.informo-article-title {
+		font-weight: bold;
+	}
+	.informo-article-intro {
+		padding: 1em 1em 0 0;
+	}
+	.informo-article-details {
+		margin: -30px -30px 0 -30px;
+		padding: 1em;
 
-.informo-article .informo-article-description {
-	padding: 1em 1em 0 0;
-}
-
-.informo-article .informo-article-content img {
-	max-width: 100%;
-}
-.informo-article .informo-article-content blockquote {
-	border-left-color: #417D44;
-}
-
-nav .brand-logo img {
-	height: 64px;
-}
-
-.side-nav .navbar-header {
-	line-height: 1.5em;
-	padding: 0.5em;
-}
+		> * {
+			padding: 0 1em;
+		}
+		i {
+			vertical-align: middle;
+		}
+	}
+	.informo-article-content {
+		img {
+			max-width: 100%;
+		}
+		blockquote {
+			border-left-color: #417D44;
+		}
+	}
 
 
-
+	&.with-img {
+		.collapsible-header > div:first-child {
+			flex: 1;
+		}
+		.informo-article-image {
+			max-width: 25%;
+			margin: -15px -15px -15px 0;
+		}
+		.informo-article-image img {
+			max-height: 200px;
+			max-width: 100%;
+		}
+	}
+}
 
 
 
 
 .informo-bg-green {
-	background-color: #417D44;
+	background-color: $primary-color;
 	color: #fff;
 }
 .informo-bg-green-light {
-	background-color: #caf0cc;
+	background-color:$primary-color-light;
 	color: #000;
 }
