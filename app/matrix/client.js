@@ -24,6 +24,7 @@ export default class MatrixClient {
 		this.accessToken = accessToken;
 		this.userID = userID;
 		this.deviceID = deviceID;
+		this.streamPos = null;
 	}
 
 	getJoinedRooms(){
@@ -85,35 +86,47 @@ export default class MatrixClient {
 		});
 	}
 
-	getMessages(roomID, filter, lim){
+	getMessages(roomID, filter, lim, resetPos = false){
+		if (resetPos) {
+			this.streamPos = null;
+		}
+
 		return new Promise((resolve, reject) => {
-			resolve(ajax.req(
-				"GET",
-				this.homeserverURL,
-				"/_matrix/client/r0/rooms/" + encodeURIComponent(roomID) + "/messages",
-				this.accessToken,
-				{
-					filter: JSON.stringify(filter),
-					limit: lim,
-				},
-			));
+			resolve(this.requestMessages(roomID, filter, lim))
 		})
 		.then((resp) => {
-			return ajax.req(
-				"GET",
-				this.homeserverURL,
-				"/_matrix/client/r0/rooms/" + encodeURIComponent(roomID) + "/messages",
-				this.accessToken,
-				{
-					dir: "b",
-					from: resp.start,
-					filter: JSON.stringify(filter),
-					limit: lim,
-				},
-			);
+			if (!(resp.chunk && resp.chunk.length)) {
+				return this.requestMessages(roomID, filter, lim)
+			}
+
+			return resp
 		})
 		.then((resp) => {
 			return resp.chunk
+		});
+	}
+
+	requestMessages(roomID, filter, lim) {
+		let body = {
+			dir: "b",
+			filter: JSON.stringify(filter),
+			limit: lim,
+		}
+
+		if (this.streamPos) {
+			body.from = this.streamPos;
+		}
+
+		return ajax.req(
+			"GET",
+			this.homeserverURL,
+			"/_matrix/client/r0/rooms/" + encodeURIComponent(roomID) + "/messages",
+			this.accessToken,
+			body,
+		)
+		.then((resp) => {
+			this.streamPos = resp.end;
+			return resp;
 		});
 	}
 }

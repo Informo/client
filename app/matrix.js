@@ -74,7 +74,7 @@ export function loadInformo() {
 	})
 }
 
-export function getNews(sourceClassName = null) {
+export function getNews(sourceClassName = null, resetPos = false) {
 	return new Promise((resolve, reject) => {
 		let filter = {types: [],senders: []}
 
@@ -92,7 +92,7 @@ export function getNews(sourceClassName = null) {
 			}
 		}
 
-		resolve(mxClient.getMessages(mxRoomID, filter, 30));
+		resolve(mxClient.getMessages(mxRoomID, filter, 20, resetPos));
 	})
 	.then((news) => {
 		let updatedNews = [];

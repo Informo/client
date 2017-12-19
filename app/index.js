@@ -12,10 +12,11 @@ import * as matrix from './matrix'
 const eventPrefix = "network.informo.news.";
 const homeserverURL = 'https://matrix.org';
 
+var isLoading = false;
+var noMorePosts = false;
 
 $( document ).ready(function(){
 	const navBarHeight = 64;
-
 
 	$("#navbar-left-button").sideNav({closeOnClick: true});
 	$('#article-list').collapsible();
@@ -36,10 +37,21 @@ $( document ).ready(function(){
 	})
 
 	$(window).bind('hashchange', () => {
+		noMorePosts = false;
 		clearArticles();
 		loader.indeterminate()
 		loader.reset();
-		displayNews()
+		displayNews(true);
+	});
+
+	$(window).bind('scroll', () => {
+		let loaderPos = $("#bottom-loader").position().top;
+
+		if (!loader.active && window.scrollY + window.innerHeight >= loaderPos && !isLoading && !noMorePosts) {
+			isLoading = true;
+			displayNews(false, true)
+			.then(() => isLoading = false);
+		}
 	});
 })
 
@@ -47,12 +59,18 @@ function updateEndpointUrl(url){
 	$("#navbar-left .endpoint-url").text(url);
 }
 
-function displayNews() {
+function displayNews(resetPos = false, bottomLoad = false) {
 	let currentSource = getCurrentSource()
 
-	return matrix.getNews(currentSource)
+	return matrix.getNews(currentSource, resetPos)
 	.then((news) => {
-		news.sort((a, b) => a.content.date - b.content.date)
+		if (!(news && news.length)) {
+			noMorePosts = true;
+			$("#bottom-loader").css("display", "none");
+			return
+		}
+
+		news.sort((a, b) => b.content.date - a.content.date)
 
 		loader.update(100);
 		for(let n of news) {
@@ -70,6 +88,8 @@ function displayNews() {
 				);
 			}
 		}
+
+		$("#bottom-loader").css('display', 'block');
 	})
 }
 
@@ -199,7 +219,7 @@ function addArticle(title, description, author, image, source, ts, content, href
 	setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
 	setSanitizedHtmlContent(article.find(".informo-article-content"), content);
 
-	$("#article-list").prepend(article);
+	$("#article-list").append(article);
 }
 
 
