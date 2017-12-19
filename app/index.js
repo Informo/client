@@ -14,6 +14,7 @@ const homeserverURL = 'https://matrix.org';
 
 var isLoading = false;
 var noMorePosts = false;
+var currentSource = null;
 
 $( document ).ready(function(){
 	const navBarHeight = 64;
@@ -37,11 +38,16 @@ $( document ).ready(function(){
 	})
 
 	$(window).bind('hashchange', () => {
-		noMorePosts = false;
-		clearArticles();
-		loader.indeterminate()
-		loader.reset();
-		displayNews(true);
+		let prevSource = null;
+		getCurrentSource();
+
+		if (prevSource != currentSource) {
+			noMorePosts = false;
+			clearArticles();
+			loader.indeterminate()
+			loader.reset();
+			displayNews(true);
+		}
 	});
 
 	$(window).bind('scroll', () => {
@@ -60,8 +66,6 @@ function updateEndpointUrl(url){
 }
 
 function displayNews(resetPos = false, bottomLoad = false) {
-	let currentSource = getCurrentSource()
-
 	return matrix.getNews(currentSource, resetPos)
 	.then((news) => {
 		if (!(news && news.length)) {
@@ -97,11 +101,12 @@ function getCurrentSource() {
 	let currentURL = window.location.href;
 	let hashIndex = currentURL.indexOf("#");
 
-	if (hashIndex < 0 || !currentURL.substr(hashIndex+1)) {
-		return null
+	if (hashIndex < 0 || !currentURL.substr(hashIndex+1).length) {
+		currentSource = null;
+		return;
 	}
 
-	return eventPrefix + currentURL.substr(hashIndex+1);
+	currentSource = eventPrefix + currentURL.substr(hashIndex+1);
 }
 
 function updateSources(){
