@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Informo
+Comment=Safely browse news using the Matrix.org decentralized network
+Exec="/usr/bin/informo"
+Terminal=false
+Type=Application
+Icon=riot
+#StartupWMClass="Informo"
+Categories=Network;News;Information
