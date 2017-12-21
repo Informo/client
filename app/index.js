@@ -14,7 +14,8 @@ const homeserverURL = 'https://matrix.org';
 
 var isLoading = false;
 var noMorePosts = false;
-var currentSource = null;
+var prevSource;
+var currentSource;
 
 $( document ).ready(function(){
 	const navBarHeight = 64;
@@ -24,6 +25,8 @@ $( document ).ready(function(){
 	$('.modal').modal();
 
 	updateEndpointUrl(homeserverURL);
+
+	getCurrentSource();
 
 	matrix.initMatrixClient(homeserverURL)
 	.then(matrix.loadInformo)
@@ -37,18 +40,7 @@ $( document ).ready(function(){
 		loader.update(0, reason)
 	})
 
-	$(window).bind('hashchange', () => {
-		let prevSource = null;
-		getCurrentSource();
-
-		if (prevSource != currentSource) {
-			noMorePosts = false;
-			clearArticles();
-			loader.indeterminate()
-			loader.reset();
-			displayNews(true);
-		}
-	});
+	$(window).bind('hashchange', () => resetDisplay());
 
 	$(window).bind('scroll', () => {
 		let loaderPos = $("#bottom-loader").position().top;
@@ -59,7 +51,21 @@ $( document ).ready(function(){
 			.then(() => isLoading = false);
 		}
 	});
+
+	$('#refresh-button').bind('click', () => resetDisplay(false));
 })
+
+function resetDisplay(checkSource = true) {
+	getCurrentSource();
+
+	if ((prevSource != currentSource) || !checkSource) {
+		noMorePosts = false;
+		clearArticles();
+		loader.indeterminate()
+		loader.reset();
+		displayNews(true);
+	}
+}
 
 function updateEndpointUrl(url){
 	$("#navbar-left .endpoint-url").text(url);
@@ -98,15 +104,20 @@ function displayNews(resetPos = false, bottomLoad = false) {
 }
 
 function getCurrentSource() {
+	prevSource = currentSource;
+
 	let currentURL = window.location.href;
 	let hashIndex = currentURL.indexOf("#");
 
 	if (hashIndex < 0 || !currentURL.substr(hashIndex+1).length) {
 		currentSource = null;
-		return;
+	} else {
+		currentSource = eventPrefix + currentURL.substr(hashIndex+1);
 	}
 
-	currentSource = eventPrefix + currentURL.substr(hashIndex+1);
+	if (typeof prevSource == "undefined") {
+		prevSource = currentSource;
+	}
 }
 
 function updateSources(){
@@ -152,6 +163,7 @@ function getEventFilter(){
 }
 
 function clearArticles(){
+	$("#bottom-loader").css("display", "none");
 	$("#article-list > *").remove();
 }
 
