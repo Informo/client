@@ -26,12 +26,11 @@ $( document ).ready(function(){
 
 	updateEndpointUrl(homeserverURL);
 
-	getCurrentSource();
-
 	matrix.initMatrixClient(homeserverURL)
 	.then(matrix.loadInformo)
 	.then(updateSources)
 	.then(() => {
+		updateActiveSource();
 		loader.update(80, "Fetching latest news");
 		displayNews();
 	})
@@ -62,7 +61,7 @@ $( document ).ready(function(){
 })
 
 function resetDisplay(checkSource = true) {
-	getCurrentSource();
+	updateActiveSource();
 
 	if ((prevSource != currentSource) || !checkSource) {
 		noMorePosts = false;
@@ -70,6 +69,24 @@ function resetDisplay(checkSource = true) {
 		loader.indeterminate()
 		loader.reset();
 		displayNews(true);
+	}
+}
+
+function updateActiveSource() {
+	let hash = "#" + getCurrentSource();
+	let activeClassValue = " grey lighten-1"
+
+	for (let el of $(".informo-source-link")) {
+		let href = $(el).find("a").attr("href");
+		let classes = $(el).attr("class");
+
+		if (href === hash) {
+			classes += activeClassValue;
+		} else {
+			classes = classes.replace(activeClassValue, "");
+		}
+
+		$(el).attr("class", classes);
 	}
 }
 
@@ -114,16 +131,19 @@ function getCurrentSource() {
 
 	let currentURL = window.location.href;
 	let hashIndex = currentURL.indexOf("#");
+	let substring = currentURL.substr(hashIndex+1);
 
-	if (hashIndex < 0 || !currentURL.substr(hashIndex+1).length) {
+	if (hashIndex < 0 || !substring.length) {
 		currentSource = null;
 	} else {
-		currentSource = eventPrefix + currentURL.substr(hashIndex+1);
+		currentSource = eventPrefix + substring;
 	}
 
 	if (typeof prevSource == "undefined") {
 		prevSource = currentSource;
 	}
+
+	return substring;
 }
 
 function updateSources(){
