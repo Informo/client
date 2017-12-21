@@ -35,7 +35,7 @@ module.exports = {
 					name: 'fonts/[name].[ext]'
 				}
 			},
-			{
+			{// TODO: copy all images in dist/
 				loader: 'file-loader',
 				test: /\.(png|jpg|gif|svg)$/,
 				options: {
