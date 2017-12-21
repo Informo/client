@@ -52,6 +52,12 @@ $( document ).ready(function(){
 		}
 	});
 
+	$(window).bind('keyup', (ev) => {
+		if (ev.altKey && ev.originalEvent.key == 'r') {
+			resetDisplay(false);
+		}
+	});
+
 	$('#refresh-button').bind('click', () => resetDisplay(false));
 })
 
