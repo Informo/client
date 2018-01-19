@@ -8,8 +8,8 @@ import storage from './storage'
 import loader from './loader'
 import informoSources from './sources'
 import * as matrix from './matrix'
+import {eventPrefix} from './const'
 
-const eventPrefix = "network.informo.news.";
 const homeserverURL = 'https://matrix.org';
 
 var isLoading = false;

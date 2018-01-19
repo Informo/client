@@ -2,6 +2,11 @@ import storage from './storage'
 import loader from './loader'
 import informoSources from './sources'
 import MatrixClient from './matrix/client'
+import {eventPrefix} from './const'
+
+import stringify from 'canonical-json'
+import * as nacl from 'tweetnacl'
+import * as naclUtil from 'tweetnacl-util'
 
 const roomAlias = '#informo-test:matrix.org';
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
@@ -93,6 +98,39 @@ export function getNews(sourceClassName = null, resetPos = false) {
 		}
 
 		resolve(mxClient.getMessages(mxRoomID, filter, 20, resetPos));
+	})
+	.then((news) => {
+		let p = []
+		for (let i in news) {
+			p.push(
+				new Promise((resolve, reject) => {
+					let sig, key, canonical;
+					try {
+						sig = naclUtil.decodeBase64(news[i].content.signature);
+						key = naclUtil.decodeBase64(informoSources.sources[news[i].type].publicKey);
+						delete(news[i].content.signature);
+						canonical = naclUtil.decodeUTF8(stringify(news[i].content));
+					} catch(e) {
+						resolve(false);
+					}
+					resolve(nacl.sign.detached.verify(canonical, sig, key));
+				})
+				.then((verified) => {
+                    // TODO: Work on a proper verification badge, which we can
+                    // display (preferably in index.js because it handles
+					// display) based on the news[i].content.verified boolean.
+					news[i].content.verified = verified;
+					if (verified) {
+						news[i].content.headline += " 🗸"
+					} else {
+						news[i].content.headline += " 𐄂"
+					}
+					return news[i];
+				})
+			);
+		}
+
+		return Promise.all(p)
 	})
 	.then((news) => {
 		let updatedNews = [];

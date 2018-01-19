@@ -8,6 +8,7 @@ class Sources {
 			this.sources[source.className] = {
 				publishers: source.publishers,
 				name: source.name,
+				publicKey: source.publicKey,
 				unread: 0,//TODO
 			}
 		}
