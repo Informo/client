@@ -24,45 +24,60 @@ import loader from './loader'
 import informoSources from './sources'
 import * as matrix from './matrix'
 import {eventPrefix} from './const'
-
-const homeserverURL = 'https://matrix.org';
+import Router from './router'
 
 var isLoading = false;
 var noMorePosts = false;
 var prevSource;
 var currentSource;
 
-$( document ).ready(function(){
-	const navBarHeight = 64;
+
+$(document).ready(function(){
 
 	$("#navbar-left-button").sideNav({closeOnClick: true});
-	$('#article-list').collapsible();
-	$('.modal').modal();
+	$("#article-list").collapsible();
+	$(".modal").modal();
 
+	if(!storage.homeserverURL){
+		//Redirect to connect page
+		window.location.hash = "#/connect";//TODO: handle post connection redirection
+	}
+	else{
+		if(window.location.hash === ""){
+			window.location.hash = "#/feeds";
+		}
+		Router.updateView();
+
+		connectMatrixHomeserver(storage.homeserverURL);
+	}
+});
+
+
+export default function connectMatrixHomeserver(homeserverURL) {
 	updateEndpointUrl(homeserverURL);
 
 	matrix.initMatrixClient(homeserverURL)
-	.then(matrix.loadInformo)
-	.then(updateSources)
-	.then(() => {
-		updateActiveSource();
-		loader.update(80, "Fetching latest news");
-		displayNews();
-	})
-	.catch((reason) => {
-		console.error(reason);
-		loader.update(0, reason)
-	})
+		.then(matrix.loadInformo)
+		.then(updateSources)
+		.then(() => {
+			updateActiveSource();
+			loader.update(80, "Fetching latest news");
+			displayNews();
+		})
+		.catch((reason) => {
+			console.error(reason);
+			loader.update(0, reason);
+		});
 
-	$(window).bind('hashchange', () => resetDisplay());
+	$(window).bind("hashchange", () => resetDisplay());
 
-	$(window).bind('scroll', () => {
+	$(window).bind("scroll", () => {
 		let loaderPos = $("#bottom-loader").position().top;
 
 		if (!loader.active && window.scrollY + window.innerHeight >= loaderPos && !isLoading && !noMorePosts) {
 			isLoading = true;
 			displayNews(false, true)
-			.then(() => isLoading = false);
+				.then(() => isLoading = false);
 		}
 	});
 
@@ -73,7 +88,8 @@ $( document ).ready(function(){
 	});
 
 	$('#refresh-button').bind('click', () => resetDisplay(false));
-})
+}
+
 
 function resetDisplay(checkSource = true) {
 	updateActiveSource();

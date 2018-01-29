@@ -42,6 +42,19 @@ export default class MatrixClient {
 		this.streamPos = null;
 	}
 
+	getVersions(){
+		return new Promise((resolve, reject) => {
+			resolve(ajax.req(
+				"GET",
+				this.homeserverURL,
+				"/_matrix/client/versions",
+			));
+		})
+		.then((resp) => {
+			return resp["versions"]
+		});
+	}
+
 	getJoinedRooms(){
 		return new Promise((resolve, reject) => {
 			resolve(ajax.req(

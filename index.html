@@ -70,30 +70,84 @@ limitations under the License.
 		</ul>
 
 		<main id="main-container">
-			<div id="loader" class="container valign-wrapper center-align">
-				<div>
-					<span id="loader-text" class="flow-text">Loading page...</span>
-					<div class="progress">
-						<div id="loader-progress-bar" class="determinate" style="width: 0%"></div>
-					</div>
+			<div id="page-connect">
+				<div class="container">
+
+					<form id="form-connect-homeserver">
+						<div class="card informo-bg-green-light center-small">
+							<div class="card-content">
+								<span class="card-title">Homeserver connection</span>
+								<p>
+									<form>
+										<div class="input-field">
+											<div class="material-icons prefix">dns</div>
+											<input name="homeserver-url" id="form-connect-homeserver-url" type="url" class="validate">
+											<label for="homeserver-url">Server URL</label>
+										</div>
+									</form>
+								</p>
+							</div>
+							<div class="card-action">
+
+								<button class="btn waves-effect waves-light" type="submit" name="action">Connect
+									<i class="material-icons right">send</i>
+								</button>
+
+							</div>
+						</div>
+					</form>
+
+
+					<p>
+						Welcome !<br/>
+						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+						<table class="highlight">
+							<thead>
+								<tr><th>URL</th><th>Location</th><th>Owner/admin</th><th>Additional info.</th></tr>
+							</thead>
+							<tbody id="connect-homeserver-list">
+							</tbody>
+						</table>
+					</p>
 				</div>
 			</div>
-			<div id="main-content" class="container" style="display: none">
-				<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
-			</div>
 
-			<div id="bottom-loader">
-				<div class="preloader-wrapper active">
-					<div class="spinner-layer spinner-green-only">
-						<div class="circle-clipper left">
-							<div class="circle"></div>
-						</div><div class="gap-patch">
-							<div class="circle"></div>
-						</div><div class="circle-clipper right">
-							<div class="circle"></div>
+			<div id="page-feeds">
+				<div id="loader" class="container valign-wrapper center-align">
+					<div>
+						<span id="loader-text" class="flow-text">Loading page...</span>
+						<div class="progress">
+							<div id="loader-progress-bar" class="determinate" style="width: 0%"></div>
 						</div>
 					</div>
 				</div>
+				<div id="main-content" class="container" style="display: none">
+					<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
+				</div>
+
+				<div id="bottom-loader">
+					<div class="preloader-wrapper active">
+						<div class="spinner-layer spinner-green-only">
+							<div class="circle-clipper left">
+								<div class="circle"></div>
+							</div><div class="gap-patch">
+								<div class="circle"></div>
+							</div><div class="circle-clipper right">
+								<div class="circle"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="page-404" class="center">
+				<h1>404 - Page not found</h1>
 			</div>
 		</main>
 
