@@ -30,41 +30,129 @@ const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, 'g')
 
 var mxClient;
 var mxRoomID;
+var currentHomeserverURL;
 
-export function initMatrixClient(homeserverURL){
-	return new Promise((resolve, reject) => {
-		loader.update(20, "Creating session at " + homeserverURL);
+var pendingConnectionPromise = null;
+var connectingToast;
+var connectingToastText;
 
-		if(storage.homeserverURL === null || storage.homeserverURL !== homeserverURL || storage.accessToken === null){
-			console.debug("Registering as guest")
-			return resolve(MatrixClient.registerGuest(homeserverURL));
+
+function connectingToastStart(){
+	connectingToast = Materialize.toast($(`
+		<div class="preloader-wrapper small active" style="margin-right: 1em;">
+			<div class="spinner-layer spinner-green-only">
+				<div class="circle-clipper left">
+					<div class="circle"></div>
+				</div>
+				<div class="gap-patch">
+					<div class="circle"></div>
+				</div>
+				<div class="circle-clipper right">
+					<div class="circle"></div>
+				</div>
+			</div>
+		</div>
+		<div class="toast-text"></div>
+		`), Infinity, "connecting-toast");
+}
+function connectingToastSetContent(html){
+	console.debug("Informo connection progress: ", html);
+	$(connectingToast.el).find(".toast-text").html(html);
+}
+
+function connectingToastEnd(html, endClass, timeout = 4000){
+	connectingToastSetContent(html);
+	$(connectingToast.el).addClass(endClass);
+	$(connectingToast.el).find(".preloader-wrapper").hide();
+
+	setTimeout(() => connectingToast.remove(), timeout);
+}
+
+
+/// Return a promise that resolves into a matrix client (and establish the connection if needed)
+export function getConnectedMatrixClient(){
+
+	if(mxClient === null || mxRoomID === null || storage.homeserverURL !== currentHomeserverURL){
+		// Create a new connection
+
+		if(mxClient !== null){
+			// TODO: gently disconnect from current server
 		}
 
-		resolve(new MatrixClient(
-			storage.homeserverURL,
-			storage.accessToken,
-			storage.userId,
-			storage.deviceId,
-		));
-	})
-	.then((client) => {
-		storage.homeserverURL = client.homeserverURL;
-		storage.accessToken = client.accessToken;
-		storage.userId = client.userID;
-		storage.deviceId = client.deviceID;
-		storage.save();
+		if(pendingConnectionPromise !== null){
+			console.debug("Matrix Connection already pending");
+			// Resolve with current pending connection
+			return pendingConnectionPromise; // TODO: untested
+		}
 
-		return mxClient = client;
-	});
+		connectingToastStart();
+		connectingToastSetContent("Connecting to <code>" + storage.homeserverURL + "</code>");
+
+		pendingConnectionPromise = new Promise((resolve, reject) => {
+
+			if(storage.homeserverURL === null || storage.homeserverURL !== currentHomeserverURL || storage.accessToken === null){
+				console.debug("Registering as guest");
+				connectingToastSetContent("Registering as guest on <code>" + storage.homeserverURL + "</code>");
+				return resolve(MatrixClient.registerGuest(storage.homeserverURL));
+			}
+
+			resolve(new MatrixClient(
+				storage.homeserverURL,
+				storage.accessToken,
+				storage.userId,
+				storage.deviceId,
+			));
+		})
+		.then((client) => {
+			storage.homeserverURL = client.homeserverURL;
+			storage.accessToken = client.accessToken;
+			storage.userId = client.userID;
+			storage.deviceId = client.deviceID;
+			storage.save();
+
+			$("#navbar-left .endpoint-url").text(storage.homeserverURL);//TODO: move from here
+
+			mxClient = client
+			pendingConnectionPromise = null;
+			return mxClient;
+		},
+		(err) => {
+			pendingConnectionPromise = null;
+			connectingToastEnd("Could not connect to <code>" + storage.homeserverURL + "</code>", "red darken-3");
+			throw err;
+		});
+	}
+	else {
+		console.debug("Matrix already connected");
+		pendingConnectionPromise = new Promise((resolve, reject) => { resolve(mxClient); });
+	}
+
+
+	pendingConnectionPromise
+		.then(loadInformo)
+		.then(() => {
+			connectingToastEnd("Connected to Informo through <code>" + storage.homeserverURL + "</code>", "informo-bg-green");
+		},
+		(err) => {
+			pendingConnectionPromise = null;
+			connectingToastEnd("Could not fetch Informo data", "red darken-3");
+			throw err;
+		})
+		.then(() => {
+			return mxClient;
+		});
+
+	return pendingConnectionPromise;
 }
 
 export function loadInformo() {
 	return new Promise((resolve, reject) => {
-		loader.update(40, "Entering Informo");
+		connectingToastSetContent("Searching Informo room <code>"+roomAlias+"</code>");
 		resolve(mxClient.getRoomIDForAlias(roomAlias))
 	})
 	.then((roomID) => {
-		mxRoomID = roomID
+		connectingToastSetContent("Check if joined Informo room <code>"+roomAlias+"</code>");
+		mxRoomID = roomID;
 		return mxClient.getJoinedRooms();
 	})
 	.then((rooms) => {
@@ -80,10 +168,11 @@ export function loadInformo() {
 			return Promise.resolve();
 		}
 
+		connectingToastSetContent("Joining Informo room <code>"+roomAlias+"</code>");
 		return mxClient.joinRoom(roomAlias);
 	})
 	.then(() => {
-		loader.update(60, "Fetching sources list");
+		connectingToastSetContent("Fetching Informo source list");
 		return mxClient.getStateEvent(mxRoomID, "network.informo.sources");
 	})
 	.then((sources) => {

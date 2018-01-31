@@ -2,8 +2,9 @@
 
 import $ from "jquery";
 import storage from "../storage";
+import Router from "../router";
 import connectMatrixHomeserver from "../index";
-import MatrixClient from "../matrix/client";
+import * as matrix from "../matrix";
 import Materialize from "materialize-css";
 
 
@@ -26,11 +27,11 @@ export function init(){
 		}
 	];
 	let homeserverList = $("#connect-homeserver-list");
-	for(let [i, homeserver] of homeservers.entries()){
+	for(let homeserver of homeservers){
 
 		let tr = $(`
-			<tr>
-				<td><pre>https://url.com</pre></td>
+			<tr style="cursor: pointer;">
+				<td><code>https://url.com</code></td>
 				<td>Location</td>
 				<td>Owner</td>
 				<td>Info</td>
@@ -41,7 +42,7 @@ export function init(){
 			Materialize.updateTextFields();
 		});
 
-		tr.find("td:nth-child(1) pre").text(homeserver.url);
+		tr.find("td:nth-child(1) code").text(homeserver.url);
 		tr.find("td:nth-child(2)").text(homeserver.location);
 		tr.find("td:nth-child(3)").text(homeserver.owner);
 		tr.find("td:nth-child(4)").text(homeserver.info);
@@ -51,14 +52,15 @@ export function init(){
 
 
 	$("#form-connect-homeserver").bind("submit", () => {
-
 		let url = $("#form-connect-homeserver-url").val();
 
-		new MatrixClient(url).getVersions()
-			.then(() => {
-				connectMatrixHomeserver(storage.homeserverURL);
-				window.location.hash = "#/discover";
-			}, (err) => {
+		storage.homeserverURL = url;
+		matrix.getConnectedMatrixClient()
+			.then((client) => {
+				console.log("Connected to client: ", client);
+				Router.navigate("/discover");
+			},
+			(err) => {
 				console.error("Could not connect to matrix server: ", err);
 				Materialize.toast("Error: " + err, 4000, "red darken-3");
 			});

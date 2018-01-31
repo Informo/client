@@ -13,7 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import $ from "jquery";
+
 import * as connectPage from "./pages/connect";
+import * as feedsPage from "./pages/feeds";
 
 class Router {
 	constructor(){
@@ -28,7 +31,7 @@ class Router {
 				path: "/feeds",
 				elmt: "#page-feeds",
 				hideSidebar: false,
-				onInit: function(){},
+				onInit: feedsPage.init,
 			},
 			{
 				path: "/feed/:sourceName",
@@ -52,15 +55,27 @@ class Router {
 		this.currentRoute = null;
 
 
-		$(window).bind("hashchange", () => this.updateView());
+		$(window).bind("hashchange", () => {
+			this.updateView();
+			//TODO: scroll to anchor ix exists && is visible
+		});
 	}
 
 
+	currentVirtualUrl(){
+		return new URL(window.location.origin + window.location.hash.substr(1));
+	}
 
+	navigate(path){
+		if(path === this.currentVirtualUrl().pathname){
+			this.updateView();
+		}
+		else{
+			window.location.hash = "#" + path;
+		}
+	}
 
 	updateView(){
-		let lastView = this.currentRoute;
-
 		let routeIndex = this._findCurrentRoute();
 		if(routeIndex >= 0) {
 			this.currentRoute = this.routes[routeIndex];
@@ -70,27 +85,25 @@ class Router {
 			this.currentRoute = this.route404;
 		}
 
-		if(this.currentView !== lastView){
-			console.log("Current route: ", this.currentRoute);
+		$("#main-container > *").hide();
+		let elmt = $("#main-container").find(this.currentRoute.elmt);
 
-			$("#main-container > *").hide();
-			let elmt = $("#main-container").find(this.currentRoute.elmt);
+		elmt.show();
+		this.currentRoute.onInit();
 
-			elmt.show();
-			this.currentRoute.onInit();
-
-			if(this.currentRoute.hideSidebar === true)
-				$("body").addClass("no-sidebar");
-			else
-				$("body").removeClass("no-sidebar");
-		}
+		if(this.currentRoute.hideSidebar === true)
+			$("body").addClass("no-sidebar");
+		else
+			$("body").removeClass("no-sidebar");
 
 	}
 
 	getPathParamValue(paramName){
-		for(let [i, name] of this.routes[this.currentView]) {
+		let currentPath = this.currentVirtualUrl().pathname.split("/").filter((a) => a != "");
+
+		for(let [i, name] of this.currentRoute.path.split("/").filter((a) => a != "")) {
 			if(name === (":"+paramName)){
-				return window.location.pathname.split("/")[i];
+				return currentPath[i];
 			}
 		}
 		return null;
@@ -98,8 +111,7 @@ class Router {
 
 
 	_findCurrentRoute(){
-		let location = new URL("http://_/" + window.location.hash.substr(1));//TODO: ugly, should be a way to only parse path + hash
-		let currentPath = location.pathname.split("/").filter((a) => a != "");
+		let currentPath = this.currentVirtualUrl().pathname.split("/").filter((a) => a != "");
 
 		for(let [i, route] of this.routes.entries()){
 			let path = route.path.split("/").filter((a) => a != "");
@@ -120,5 +132,6 @@ class Router {
 		}
 		return -1;
 	}
+
 }
 export default (new Router);
