@@ -119,23 +119,8 @@ limitations under the License.
 			</div>
 
 			<div id="page-feeds">
-				<div id="loader" class="container valign-wrapper center-align">
-					<div>
-						<span id="loader-text" class="flow-text">Loading page...</span>
-						<div class="progress">
-							<div id="loader-progress-bar" class="determinate" style="width: 0%"></div>
-						</div>
-					</div>
-				</div>
-
-				<h1>Feed list</h1><!-- TODO: Remove -->
-
-				<div id="main-content" class="container" style="display: none">
-					<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
-				</div>
-
-				<div id="bottom-loader">
-					<div class="preloader-wrapper active">
+				<div id="page-feeds-loader" class="center-align">
+					<div class="preloader-wrapper small active">
 						<div class="spinner-layer spinner-green-only">
 							<div class="circle-clipper left">
 								<div class="circle"></div>
@@ -143,6 +128,27 @@ limitations under the License.
 								<div class="circle"></div>
 							</div><div class="circle-clipper right">
 								<div class="circle"></div>
+							</div>
+						</div>
+
+					</div>
+					<div class="loader-text flow-text"></div>
+				</div>
+				<div id="page-feeds-content" style="display: none">
+					<div class="container">
+						<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
+					</div>
+
+					<div id="page-feeds-bottom-loader">
+						<div class="preloader-wrapper active">
+							<div class="spinner-layer spinner-green-only">
+								<div class="circle-clipper left">
+									<div class="circle"></div>
+								</div><div class="gap-patch">
+									<div class="circle"></div>
+								</div><div class="circle-clipper right">
+									<div class="circle"></div>
+								</div>
 							</div>
 						</div>
 					</div>

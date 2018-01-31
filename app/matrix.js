@@ -56,7 +56,7 @@ function connectingToastStart(){
 		`), Infinity, "connecting-toast");
 }
 function connectingToastSetContent(html){
-	console.debug("Informo connection progress: ", html);
+	console.debug("Informo connection progress:", html);
 	$(connectingToast.el).find(".toast-text").html(html);
 }
 
@@ -72,17 +72,17 @@ function connectingToastEnd(html, endClass, timeout = 4000){
 /// Return a promise that resolves into a matrix client (and establish the connection if needed)
 export function getConnectedMatrixClient(){
 
-	if(mxClient === null || mxRoomID === null || storage.homeserverURL !== currentHomeserverURL){
+	if(pendingConnectionPromise !== null){
+		console.debug("Matrix Connection already pending");
+		// Resolve with current pending connection
+		return pendingConnectionPromise; // TODO: untested
+	}
+
+	if(mxClient === null || storage.homeserverURL !== currentHomeserverURL){
 		// Create a new connection
 
 		if(mxClient !== null){
 			// TODO: gently disconnect from current server
-		}
-
-		if(pendingConnectionPromise !== null){
-			console.debug("Matrix Connection already pending");
-			// Resolve with current pending connection
-			return pendingConnectionPromise; // TODO: untested
 		}
 
 		connectingToastStart();
@@ -90,36 +90,51 @@ export function getConnectedMatrixClient(){
 
 		pendingConnectionPromise = new Promise((resolve, reject) => {
 
-			if(storage.homeserverURL === null || storage.homeserverURL !== currentHomeserverURL || storage.accessToken === null){
-				console.debug("Registering as guest");
-				connectingToastSetContent("Registering as guest on <code>" + storage.homeserverURL + "</code>");
-				return resolve(MatrixClient.registerGuest(storage.homeserverURL));
-			}
+			new Promise((resolve, reject) => {
+				if(storage.homeserverURL === null || storage.homeserverURL !== currentHomeserverURL || storage.accessToken === null){
+					console.debug("Registering as guest");
+					connectingToastSetContent("Registering as guest on <code>" + storage.homeserverURL + "</code>");
+					return resolve(MatrixClient.registerGuest(storage.homeserverURL));
+				}
 
-			resolve(new MatrixClient(
-				storage.homeserverURL,
-				storage.accessToken,
-				storage.userId,
-				storage.deviceId,
-			));
-		})
-		.then((client) => {
-			storage.homeserverURL = client.homeserverURL;
-			storage.accessToken = client.accessToken;
-			storage.userId = client.userID;
-			storage.deviceId = client.deviceID;
-			storage.save();
+				resolve(new MatrixClient(
+					storage.homeserverURL,
+					storage.accessToken,
+					storage.userId,
+					storage.deviceId
+				));
+			})
+				.then((client) => {
+					storage.homeserverURL = client.homeserverURL;
+					storage.accessToken = client.accessToken;
+					storage.userId = client.userID;
+					storage.deviceId = client.deviceID;
+					storage.save();
 
-			$("#navbar-left .endpoint-url").text(storage.homeserverURL);//TODO: move from here
+					$("#navbar-left .endpoint-url").text(storage.homeserverURL);//TODO: move from here
 
-			mxClient = client
-			pendingConnectionPromise = null;
-			return mxClient;
-		},
-		(err) => {
-			pendingConnectionPromise = null;
-			connectingToastEnd("Could not connect to <code>" + storage.homeserverURL + "</code>", "red darken-3");
-			throw err;
+					mxClient = client;
+					currentHomeserverURL = storage.homeserverURL;
+					pendingConnectionPromise = null;
+					return mxClient;
+				},
+				(err) => {
+					pendingConnectionPromise = null;
+					connectingToastEnd("Could not connect to <code>" + storage.homeserverURL + "</code>", "red darken-3");
+					throw err;
+				})
+				.then(loadInformo)
+				.then(() => {
+					connectingToastEnd("Connected to Informo through <code>" + storage.homeserverURL + "</code>", "informo-bg-green");
+				},
+				(err) => {
+					pendingConnectionPromise = null;
+					connectingToastEnd("Could not fetch Informo data", "red darken-3");
+					throw err;
+				})
+				.then(() => {
+					resolve(mxClient);
+				});
 		});
 	}
 	else {
@@ -128,62 +143,51 @@ export function getConnectedMatrixClient(){
 	}
 
 
-	pendingConnectionPromise
-		.then(loadInformo)
-		.then(() => {
-			connectingToastEnd("Connected to Informo through <code>" + storage.homeserverURL + "</code>", "informo-bg-green");
-		},
-		(err) => {
-			pendingConnectionPromise = null;
-			connectingToastEnd("Could not fetch Informo data", "red darken-3");
-			throw err;
-		})
-		.then(() => {
-			return mxClient;
-		});
-
 	return pendingConnectionPromise;
 }
 
-export function loadInformo() {
+function loadInformo() {
 	return new Promise((resolve, reject) => {
 		connectingToastSetContent("Searching Informo room <code>"+roomAlias+"</code>");
-		resolve(mxClient.getRoomIDForAlias(roomAlias))
-	})
-	.then((roomID) => {
-		connectingToastSetContent("Check if joined Informo room <code>"+roomAlias+"</code>");
-		mxRoomID = roomID;
-		return mxClient.getJoinedRooms();
-	})
-	.then((rooms) => {
-		let inRoom = false;
+		mxClient.getRoomIDForAlias(roomAlias)
+			.then((roomID) => {
+				connectingToastSetContent("Check if joined Informo room <code>"+roomAlias+"</code>");
+				mxRoomID = roomID;
+				return mxClient.getJoinedRooms();
+			})
+			.then((rooms) => {
+				let inRoom = false;
 
-		for(let room of rooms) {
-			if(room === mxRoomID) {
-				inRoom = true;
-			}
-		}
+				for(let room of rooms) {
+					if(room === mxRoomID) {
+						inRoom = true;
+					}
+				}
 
-		if(inRoom) {
-			return Promise.resolve();
-		}
+				if(inRoom) {
+					return Promise.resolve();
+				}
 
-		connectingToastSetContent("Joining Informo room <code>"+roomAlias+"</code>");
-		return mxClient.joinRoom(roomAlias);
-	})
-	.then(() => {
-		connectingToastSetContent("Fetching Informo source list");
-		return mxClient.getStateEvent(mxRoomID, "network.informo.sources");
-	})
-	.then((sources) => {
-		informoSources.setSources(sources);
-		if(!informoSources.hasSources()) {
-			throw "Could not retrieve sources"
-		}
-	})
+				connectingToastSetContent("Joining Informo room <code>"+roomAlias+"</code>");
+				return mxClient.joinRoom(roomAlias);
+			})
+			.then(() => {
+				connectingToastSetContent("Fetching Informo source list");
+				return mxClient.getStateEvent(mxRoomID, "network.informo.sources");
+			})
+			.then((sources) => {
+				informoSources.setSources(sources);
+				if(!informoSources.hasSources()) {
+					throw "Could not retrieve sources";
+				}
+				resolve();
+			});
+	});
+
 }
 
 export function getNews(sourceClassName = null, resetPos = false) {
+	console.log("getNews", sourceClassName, resetPos);
 	return new Promise((resolve, reject) => {
 		let filter = {types: [],senders: []}
 

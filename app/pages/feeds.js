@@ -8,6 +8,7 @@ import Materialize from "materialize-css";
 import informoSources from "../sources";
 import {eventPrefix} from "../const";
 import loader from "../loader";
+import Router from "../router";
 
 var isLoading = false;
 var noMorePosts = false;
@@ -16,23 +17,33 @@ var currentSource;
 
 export function init(){
 
+	$("#page-feeds-loader").show();
+	$("#page-feeds-content").hide();
+
+	$("#page-feeds-loader .loader-text").text("Waiting connection to Informo...");
+
+
 	matrix.getConnectedMatrixClient()
-		.then(matrix.loadInformo)
 		.then(updateSources)
 		.then(() => {
 			updateActiveSource();
-			loader.update(80, "Fetching latest news");
-			displayNews();
+			$("#page-feeds-loader .loader-text").text("Fetching latest news");
+			return displayNews();
 		})
 		.catch((reason) => {
 			console.error(reason);
-			loader.update(0, reason);
+			$("#page-feeds-loader .loader-text").text("Failed: " + reason);
+		})
+		.then(() => {
+
+			$("#page-feeds-loader").hide();
+			$("#page-feeds-content").show();
 		});
 
 	$(window).bind("hashchange", () => resetDisplay());
 
 	$(window).bind("scroll", () => {
-		let loaderPos = $("#bottom-loader").position().top;
+		let loaderPos = $("#page-feeds-bottom-loader").position().top;
 
 		if (!loader.active && window.scrollY + window.innerHeight >= loaderPos && !isLoading && !noMorePosts) {
 			isLoading = true;
@@ -60,10 +71,7 @@ function updateSources(){
 	$(".informo-source-link").remove();
 	let appender = $("#sourcelist-append");
 
-	let load = $("#sourcelist-load");
-	if (load.css("display") != "none") {
-		load.css("display", "none");
-	}
+	$("#sourcelist-load").hide();
 
 	for(let className in informoSources.sources){
 
@@ -135,7 +143,7 @@ function displayNews(resetPos = false, bottomLoad = false) {
 		.then((news) => {
 			if (!(news && news.length)) {
 				noMorePosts = true;
-				$("#bottom-loader").css("display", "none");
+				$("#page-feeds-bottom-loader").css("display", "none");
 				return;
 			}
 
@@ -158,14 +166,14 @@ function displayNews(resetPos = false, bottomLoad = false) {
 				}
 			}
 
-			$("#bottom-loader").css("display", "block");
+			$("#page-feeds-bottom-loader").css("display", "block");
 		});
 }
 
 function getCurrentSource() {
 	prevSource = currentSource;
 
-	let currentURL = window.location.href;
+	let currentURL = Router.currentVirtualUrl().href;
 	let hashIndex = currentURL.indexOf("#");
 	let substring = currentURL.substr(hashIndex+1);
 
@@ -190,7 +198,7 @@ function getEventFilter(){
 }
 
 function clearArticles(){
-	$("#bottom-loader").css("display", "none");
+	$("#page-feeds-bottom-loader").css("display", "none");
 	$("#article-list > *").remove();
 }
 
