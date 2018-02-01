@@ -13,20 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import storage from './storage'
-import loader from './loader'
-import informoSources from './sources'
-import MatrixClient from './matrix/client'
-import {eventPrefix} from './const'
+import storage from "./storage";
+import informoSources from "./sources";
+import MatrixClient from "./matrix/client";
+import $ from "jquery";
 
-import stringify from 'canonical-json'
-import * as nacl from 'tweetnacl'
-import * as naclUtil from 'tweetnacl-util'
+import stringify from "canonical-json";
+import * as nacl from "tweetnacl";
+import * as naclUtil from "tweetnacl-util";
 
-const roomAlias = '#informo-test:matrix.org';
+const roomAlias = "#informo-test:matrix.org";
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
-const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, '');
-const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, 'g')
+const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, "");
+const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, "g");
 
 var mxClient;
 var mxRoomID;
@@ -187,86 +186,87 @@ function loadInformo() {
 }
 
 export function getNews(sourceClassName = null, resetPos = false) {
-	console.log("getNews", sourceClassName, resetPos);
 	return new Promise((resolve, reject) => {
-		let filter = {types: [],senders: []}
+		let filter = {types: [],senders: []};
 
 		if(sourceClassName) {
-			filter.types.push(sourceClassName)
+			filter.types.push(sourceClassName);
 			for(let publisher of informoSources.sources[sourceClassName].publishers) {
-				filter.senders.push(publisher)
+				filter.senders.push(publisher);
 			}
 		} else {
 			for(let className in informoSources.sources) {
-				filter.types.push(className)
+				filter.types.push(className);
 				for(let publisher of informoSources.sources[className].publishers) {
-					filter.senders.push(publisher)
+					filter.senders.push(publisher);
 				}
 			}
 		}
 
-		resolve(mxClient.getMessages(mxRoomID, filter, 20, resetPos));
-	})
-	.then((news) => {
-		let p = []
-		for (let i in news) {
-			p.push(
-				new Promise((resolve, reject) => {
-					let sig, key, canonical;
-					try {
-						sig = naclUtil.decodeBase64(news[i].content.signature);
-						key = naclUtil.decodeBase64(informoSources.sources[news[i].type].publicKey);
-						delete(news[i].content.signature);
-						canonical = naclUtil.decodeUTF8(stringify(news[i].content));
-					} catch(e) {
-						resolve(false);
-					}
-					resolve(nacl.sign.detached.verify(canonical, sig, key));
-				})
-				.then((verified) => {
-                    // TODO: Work on a proper verification badge, which we can
-                    // display (preferably in index.js because it handles
-					// display) based on the news[i].content.verified boolean.
-					news[i].content.verified = verified;
-					if (verified) {
-						news[i].content.headline += " 🗸"
-					} else {
-						news[i].content.headline += " 𐄂"
-					}
-					return news[i];
-				})
-			);
-		}
-
-		return Promise.all(p)
-	})
-	.then((news) => {
-		let updatedNews = [];
-		for (let n of news) {
-			n.thumbnail = null
-			let medias = n.content.content.match(mxcURLRegexpGen);
-			if (medias) {
-				for (let m of medias) {
-					let parts = getPartsFromMXCURL(m)
-					let dlURL = mxClient.homeserverURL
-						+ "/_matrix/media/r0/download/" + parts.serverName
-						+ "/" + parts.mediaID;
-					n.content.content = n.content.content.replace(m, dlURL);
+		mxClient.getMessages(mxRoomID, filter, 20, resetPos)
+			.then((news) => {
+				let p = [];
+				for (let i in news) {
+					p.push(
+						new Promise((resolve, reject) => {
+							let sig, key, canonical;
+							try {
+								sig = naclUtil.decodeBase64(news[i].content.signature);
+								key = naclUtil.decodeBase64(informoSources.sources[news[i].type].publicKey);
+								delete(news[i].content.signature);
+								canonical = naclUtil.decodeUTF8(stringify(news[i].content));
+							} catch(e) {
+								resolve(false);
+							}
+							resolve(nacl.sign.detached.verify(canonical, sig, key));
+						})
+							.then((verified) => {
+								// TODO: Work on a proper verification badge, which we can
+								// display (preferably in index.js because it handles
+								// display) based on the news[i].content.verified boolean.
+								news[i].content.verified = verified;
+								if (verified) {
+									news[i].content.headline += " 🗸";
+								} else {
+									news[i].content.headline += " 𐄂";
+								}
+								return news[i];
+							})
+					);
 				}
-				let thumbnailParts = getPartsFromMXCURL(medias[0])
-				n.content.thumbnail = mxClient.homeserverURL
-					+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
-					+ "/" + thumbnailParts.mediaID;
-			}
-			updatedNews.push(n)
-		}
 
-		return updatedNews
+				return Promise.all(p);
+			})
+			.then((news) => {
+				let updatedNews = [];
+				for (let n of news) {
+					n.thumbnail = null;
+					let medias = n.content.content.match(mxcURLRegexpGen);
+					if (medias) {
+						for (let m of medias) {
+							let parts = getPartsFromMXCURL(m);
+							let dlURL = mxClient.homeserverURL
+								+ "/_matrix/media/r0/download/" + parts.serverName
+								+ "/" + parts.mediaID;
+							n.content.content = n.content.content.replace(m, dlURL);
+						}
+						let thumbnailParts = getPartsFromMXCURL(medias[0]);
+						n.content.thumbnail = mxClient.homeserverURL
+							+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
+							+ "/" + thumbnailParts.mediaID;
+					}
+					updatedNews.push(n);
+				}
+
+				resolve(updatedNews);
+			});
+
+
 	});
 }
 
 function getPartsFromMXCURL(mxcURL) {
-	let parts = mxcURL.match(mxcURLRegexpLoc)
+	let parts = mxcURL.match(mxcURLRegexpLoc);
 	return {
 		serverName: parts[1],
 		mediaID: parts[2],

@@ -2,53 +2,56 @@
 
 import $ from "jquery";
 import storage from "../storage";
-import connectMatrixHomeserver from "../index";
 import * as matrix from "../matrix";
 import Materialize from "materialize-css";
 import informoSources from "../sources";
 import {eventPrefix} from "../const";
-import loader from "../loader";
 import Router from "../router";
 
-var isLoading = false;
 var noMorePosts = false;
 var prevSource;
 var currentSource;
 
+let loaded = false;
+let isLoadingBottom = false;
+
 export function init(){
+	loaded = false;
+	isLoadingBottom = false;
 
-	$("#page-feeds-loader").show();
-	$("#page-feeds-content").hide();
+	$("#page-feeds .content-loader").show();
+	$("#page-feeds .content-loader .loader-text").text("Waiting connection to Informo...");
 
-	$("#page-feeds-loader .loader-text").text("Waiting connection to Informo...");
-
+	$("#page-feeds .content").hide();
+	$("#page-feeds .bottom-loader").hide();
 
 	matrix.getConnectedMatrixClient()
 		.then(updateSources)
 		.then(() => {
 			updateActiveSource();
-			$("#page-feeds-loader .loader-text").text("Fetching latest news");
+			$("#page-feeds .content-loader .loader-text").text("Fetching latest news");
 			return displayNews();
 		})
 		.catch((reason) => {
 			console.error(reason);
-			$("#page-feeds-loader .loader-text").text("Failed: " + reason);
+			$("#page-feeds .content-loader .loader-text").text("Failed: " + reason);
 		})
 		.then(() => {
 
-			$("#page-feeds-loader").hide();
-			$("#page-feeds-content").show();
+			$("#page-feeds .content-loader").hide();
+			$("#page-feeds .content").show();
+			loaded = true;
 		});
 
 	$(window).bind("hashchange", () => resetDisplay());
 
 	$(window).bind("scroll", () => {
-		let loaderPos = $("#page-feeds-bottom-loader").position().top;
+		let loaderPos = $("#page-feeds .bottom-loader").position().top;
 
-		if (!loader.active && window.scrollY + window.innerHeight >= loaderPos && !isLoading && !noMorePosts) {
-			isLoading = true;
+		if (loaded && window.scrollY + window.innerHeight >= loaderPos && !isLoadingBottom && !noMorePosts) {
+			isLoadingBottom = true;
 			displayNews(false, true)
-				.then(() => isLoading = false);
+				.then(() => isLoadingBottom = false);
 		}
 	});
 
@@ -84,7 +87,7 @@ function updateSources(){
 				</li>`);
 
 			li.find("a")
-				.attr("href", "#" + encodeURI(evName))
+				.attr("href", "#/sources/" + encodeURI(evName))
 				.find(".link")
 				.text(informoSources.sources[className].name);
 
@@ -143,13 +146,12 @@ function displayNews(resetPos = false, bottomLoad = false) {
 		.then((news) => {
 			if (!(news && news.length)) {
 				noMorePosts = true;
-				$("#page-feeds-bottom-loader").css("display", "none");
+				$("#page-feeds .bottom-loader").hide();
 				return;
 			}
 
 			news.sort((a, b) => b.content.date - a.content.date);
 
-			loader.update(100);
 			for(let n of news) {
 				let content = n.content;
 				if (informoSources.canPublish(n.sender, n.type)) {
@@ -166,7 +168,7 @@ function displayNews(resetPos = false, bottomLoad = false) {
 				}
 			}
 
-			$("#page-feeds-bottom-loader").css("display", "block");
+			$("#page-feeds .bottom-loader").show();
 		});
 }
 
@@ -198,7 +200,7 @@ function getEventFilter(){
 }
 
 function clearArticles(){
-	$("#page-feeds-bottom-loader").css("display", "none");
+	$("#page-feeds .bottom-loader").css("display", "none");
 	$("#article-list > *").remove();
 }
 

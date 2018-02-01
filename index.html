@@ -48,10 +48,12 @@ limitations under the License.
 				<div class="center">
 					<img src="static/img/logo-full-white-128.png">
 				</div>
+				<a class="right no-padding" href="#/connect" title="Change Informo entrypoint"><i class="material-icons no-padding white-text" style="margin: 0;">exit_to_app</i></a>
 				<strong>Current endpoint URL</strong><br/>
 				<code class="endpoint-url">Not connected</code>
 			</li>
-			<li><a class="subheader">Feeds</a></li>
+			<li><a href="#/feeds"><i class="material-icons">rss_feed</i>Your feeds</a></li>
+			<li><div class="divider"></div></li>
 			<li id="sourcelist-load">
 				<div class="preloader-wrapper small active">
 					<div class="spinner-layer spinner-green-only">
@@ -66,10 +68,11 @@ limitations under the License.
 				</div>
 			</li>
 			<li id="sourcelist-append"></li>
-			<li><div class="divider"></div></li>
+			<li><a href="#/discover"><i class="material-icons">add_circle_outline</i> More feeds</a></li>
 		</ul>
 
 		<main id="main-container">
+			<!-- =========================================== -->
 			<div id="page-connect">
 				<div class="container">
 
@@ -117,29 +120,13 @@ limitations under the License.
 					</p>
 				</div>
 			</div>
-
+			<!-- =========================================== -->
 			<div id="page-feeds">
-				<div id="page-feeds-loader" class="center-align">
-					<div class="preloader-wrapper small active">
-						<div class="spinner-layer spinner-green-only">
-							<div class="circle-clipper left">
-								<div class="circle"></div>
-							</div><div class="gap-patch">
-								<div class="circle"></div>
-							</div><div class="circle-clipper right">
-								<div class="circle"></div>
-							</div>
-						</div>
 
-					</div>
-					<div class="loader-text flow-text"></div>
-				</div>
-				<div id="page-feeds-content" style="display: none">
-					<div class="container">
-						<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
-					</div>
+				<div class="container">
+					<h1>All feeds</h1>
 
-					<div id="page-feeds-bottom-loader">
+					<div class="content-loader center-align">
 						<div class="preloader-wrapper active">
 							<div class="spinner-layer spinner-green-only">
 								<div class="circle-clipper left">
@@ -150,11 +137,76 @@ limitations under the License.
 									<div class="circle"></div>
 								</div>
 							</div>
+
+						</div>
+						<div class="loader-text flow-text"></div>
+					</div>
+
+					<div class="content" style="display: none">
+						<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
+
+						<div class="bottom-loader center-align">
+							<div class="preloader-wrapper active">
+								<div class="spinner-layer spinner-green-only">
+									<div class="circle-clipper left">
+										<div class="circle"></div>
+									</div><div class="gap-patch">
+										<div class="circle"></div>
+									</div><div class="circle-clipper right">
+										<div class="circle"></div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+			<!-- =========================================== -->
+			<div id="page-source">
+				<div class="container">
 
+					<h1>Source details</h1>
+
+					<div class="content-loader center-align">
+						<div class="preloader-wrapper active">
+							<div class="spinner-layer spinner-green-only">
+								<div class="circle-clipper left">
+									<div class="circle"></div>
+								</div><div class="gap-patch">
+									<div class="circle"></div>
+								</div><div class="circle-clipper right">
+									<div class="circle"></div>
+								</div>
+							</div>
+
+						</div>
+						<div class="loader-text flow-text"></div>
+					</div>
+
+					<div class="content" style="display: none">
+						<ul id="article-list" class="collapsible popout" data-collapsible="accordion"></ul>
+
+						<div class="bottom-loader center-align">
+							<div class="preloader-wrapper active">
+								<div class="spinner-layer spinner-green-only">
+									<div class="circle-clipper left">
+										<div class="circle"></div>
+									</div><div class="gap-patch">
+										<div class="circle"></div>
+									</div><div class="circle-clipper right">
+										<div class="circle"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- =========================================== -->
+			<div id="page-discover">
+				<h1>Discover new feeds</h1>
+			</div>
+			<!-- =========================================== -->
 			<div id="page-404" class="center">
 				<h1>404 - Page not found</h1>
 			</div>

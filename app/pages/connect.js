@@ -3,7 +3,6 @@
 import $ from "jquery";
 import storage from "../storage";
 import Router from "../router";
-import connectMatrixHomeserver from "../index";
 import * as matrix from "../matrix";
 import Materialize from "materialize-css";
 
@@ -58,6 +57,7 @@ export function init(){
 		matrix.getConnectedMatrixClient()
 			.then((client) => {
 				console.log("Connected to client: ", client);
+				//TODO: redirect to /feeds if user has already selected some feeds to follow
 				Router.navigate("/discover");
 			},
 			(err) => {

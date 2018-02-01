@@ -19,7 +19,6 @@ import $ from "jquery";
 import Materialize from "materialize-css";
 
 import storage from "./storage";
-import loader from "./loader";
 import * as matrix from "./matrix";
 import Router from "./router";
 
@@ -34,7 +33,7 @@ $(document).ready(function(){
 		Router.navigate("/connect");//TODO: handle post connection redirection
 	}
 	else{
-		if(window.location.hash === ""){
+		if(window.location.hash == "" || window.location.hash == "/"){
 			Router.navigate("/feeds");
 		}
 		else{

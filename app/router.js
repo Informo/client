@@ -17,6 +17,7 @@ import $ from "jquery";
 
 import * as connectPage from "./pages/connect";
 import * as feedsPage from "./pages/feeds";
+import * as sourcePage from "./pages/source";
 
 class Router {
 	constructor(){
@@ -34,14 +35,14 @@ class Router {
 				onInit: feedsPage.init,
 			},
 			{
-				path: "/feed/:sourceName",
-				elmt: "#page-feed-specific",
+				path: "/sources/:sourceName",
+				elmt: "#page-source",
 				hideSidebar: false,
-				onInit: function(){},
+				onInit: sourcePage.init,
 			},
 			{
 				path: "/discover",
-				elmt: "#null",
+				elmt: "#page-discover",
 				hideSidebar: false,
 				onInit: function(){},
 			},
@@ -56,7 +57,9 @@ class Router {
 
 
 		$(window).bind("hashchange", () => {
-			this.updateView();
+
+			if(this.currentRoute != null && !this.matchPath(this.currentVirtualUrl().pathname, this.currentRoute.path))
+				this.updateView();
 			//TODO: scroll to anchor ix exists && is visible
 		});
 	}
@@ -76,6 +79,11 @@ class Router {
 	}
 
 	updateView(){
+		if(this.currentVirtualUrl() == "" || this.currentVirtualUrl() == "/"){
+			Router.navigate("/feeds");
+			return;
+		}
+
 		let routeIndex = this._findCurrentRoute();
 		if(routeIndex >= 0) {
 			this.currentRoute = this.routes[routeIndex];
@@ -109,25 +117,25 @@ class Router {
 		return null;
 	}
 
+	matchPath(path, pathModel){
+		const pathSplit = path.split("/").filter((a) => a != "");
+		const pathModelSplit = pathModel.split("/").filter((a) => a != "");
+
+		for(let [i, name] of pathSplit.entries()) {
+			if(pathModelSplit[i][0] === ":")
+				continue;
+
+			if(pathModelSplit[i] !== name){
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 	_findCurrentRoute(){
-		let currentPath = this.currentVirtualUrl().pathname.split("/").filter((a) => a != "");
-
 		for(let [i, route] of this.routes.entries()){
-			let path = route.path.split("/").filter((a) => a != "");
-
-			let match = true;
-			for(let [j, name] of path.entries()) {
-				if(name[0] === ":")
-					continue;
-
-				if(currentPath[j] !== name){
-					match = false;
-					break;
-				}
-			}
-
-			if(match)
+			if(this.matchPath(this.currentVirtualUrl().pathname, route.path))
 				return i;
 		}
 		return -1;
