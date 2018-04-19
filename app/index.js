@@ -33,15 +33,14 @@ $(document).ready(function(){
 		Router.navigate("/connect");//TODO: handle post connection redirection
 	}
 	else{
+		// Default landing page
 		if(window.location.hash == "" || window.location.hash == "/"){
 			Router.navigate("/feeds");
-		}
-		else{
-			Router.updateView();
 		}
 
 		matrix.getConnectedMatrixClient();//TODO: should be removed. pages.init should call this instead
 	}
+	Router.updateView();
 });
 
 
