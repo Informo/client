@@ -8,8 +8,6 @@ import $ from "jquery";
 
 export function init(){
 
-	console.log("Init");
-
 	$("#page-source .content-loader").show();
 	$("#page-source .content-loader .loader-text").text("Waiting connection to Informo...");
 

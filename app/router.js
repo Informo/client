@@ -61,11 +61,15 @@ class Router {
 	constructor(){
 		this.currentRoute = null;
 		this.lastNavbarState = false;
+		this.lastUrl = null;
 
 		$(window).bind("hashchange", () => {
-			if(this.currentRoute === null || !this.matchPath(this.currentVirtualUrl().pathname, this.currentRoute.path)){
-				//TODO: this does not work if only the path param changes
+			const newVirtURL = this.currentVirtualUrl();
+
+			if(this.currentRoute === null
+			|| newVirtURL.pathname !== this.lastUrl){
 				this.updateView();
+				this.lastUrl = newVirtURL;
 			}
 			//TODO: scroll to anchor ix exists && is visible
 		});
