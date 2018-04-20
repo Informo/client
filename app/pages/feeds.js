@@ -1,4 +1,4 @@
-
+// List all articles from all feeds
 
 import $ from "jquery";
 import storage from "../storage";
@@ -62,6 +62,8 @@ export function init(){
 	});
 
 	$("#refresh-button").bind("click", () => resetDisplay(false));
+
+	matrix.getConnectedMatrixClient();
 
 }
 

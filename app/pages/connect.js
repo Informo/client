@@ -1,4 +1,4 @@
-
+// Connection to a matrix homeserver
 
 import $ from "jquery";
 import storage from "../storage";
