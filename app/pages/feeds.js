@@ -7,6 +7,7 @@ import Materialize from "materialize-css";
 import informoSources from "../sources";
 import {eventPrefix} from "../const";
 import Router from "../router";
+import * as sidebarPage from "./sidebar";
 
 var noMorePosts = false;
 var prevSource;
@@ -26,7 +27,7 @@ export function init(){
 	$("#page-feeds .bottom-loader").hide();
 
 	matrix.getConnectedMatrixClient()
-		.then(updateSources)
+		.then(sidebarPage.updateUserSourceList)
 		.then(() => {
 			updateActiveSource();
 			$("#page-feeds .content-loader .loader-text").text("Fetching latest news");
@@ -68,43 +69,6 @@ export function init(){
 }
 
 
-
-
-
-
-function updateSources(){
-	$(".informo-source-link").remove();
-	let appender = $("#sourcelist-append");
-
-	$("#sourcelist-load").hide();
-
-	for(let className in informoSources.sources){
-
-		if(className.startsWith(eventPrefix)){
-			let evName = className.substr(eventPrefix.length);
-
-			let li = $(`
-				<li class="informo-source-link">
-					<a href="{{LINK}}"><span class="link">{{NAME}}</span><span class="new badge informo-bg-green" data-badge-caption="unread">{{UNREAD_CNT}}</span></a>
-				</li>`);
-
-			li.find("a")
-				.attr("href", "#/sources/" + encodeURI(evName))
-				.find(".link")
-				.text(informoSources.sources[className].name);
-
-
-			li.find(".badge")
-				.text(informoSources.sources[className].unread)
-				.addClass(informoSources.sources[className].unread === 0 ? "hide" : null);
-
-			appender.before(li);
-		}
-		else{
-			console.warn("network.informo.sources contains '" + className + "' that does not match 'network.informo.news.*' format");
-		}
-	}
-}
 
 
 
@@ -254,7 +218,7 @@ function addArticle(title, description, author, image, source, ts, content, href
 	}
 	// Source
 	article.find(":not(a).informo-article-source")
-		.text(source)
+		.text(source);
 	// Date
 	let date = new Date(ts*1000);
 	if (date) {

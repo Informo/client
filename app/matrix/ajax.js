@@ -13,25 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import $ from "jquery";
+
 export function req(method, homeserverURL, path, accessToken, body = {}) {
 	return new Promise((resolve, reject) => {
 		if(accessToken) {
-			path = path + "?access_token=" + accessToken
+			path = path + "?access_token=" + accessToken;
 		}
 
-		let bodyStr
+		let bodyStr;
 		if(method === "GET") {
-			bodyStr = ""
+			bodyStr = "";
 			if(Object.keys(body).length) {
 				if(!accessToken) {
-					path += "?"
+					path += "?";
 				}
 				for(let key in body) {
-					path += "&" + key + "=" + encodeURIComponent(body[key])
+					path += "&" + key + "=" + encodeURIComponent(body[key]);
 				}
 			}
 		} else {
-			bodyStr = JSON.stringify(body)
+			bodyStr = JSON.stringify(body);
 		}
 
 		resolve($.ajax({
@@ -41,8 +43,8 @@ export function req(method, homeserverURL, path, accessToken, body = {}) {
 			dataType: "json",
 			data: bodyStr,
 		})
-		.catch(() => {
-			throw "Could not connect to the Informo network"
-		}));
+			.catch((err) => {
+				throw err;
+			}));
 	});
 }

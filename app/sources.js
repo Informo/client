@@ -25,7 +25,7 @@ class Sources {
 				name: source.name,
 				publicKey: source.publicKey,
 				unread: 0,//TODO
-			}
+			};
 		}
 	}
 
@@ -34,11 +34,11 @@ class Sources {
 	}
 
 	hasSources(){
-		return Object.keys(this.sources).length > 0
+		return Object.keys(this.sources).length > 0;
 	}
 
 	canPublish(publisher, className){
-		let cp = false
+		let cp = false;
 
 		for (let p of this.sources[className].publishers) {
 			if (p === publisher) {
@@ -51,4 +51,4 @@ class Sources {
 	}
 }
 
-export default (new Sources)
+export default (new Sources);

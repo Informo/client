@@ -31,7 +31,7 @@ limitations under the License.
 					<a class="brand-logo center" href="#">
 						<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
 					</a>
-					<ul class="left hide-on-large-only">
+					<ul class="left hide-on-large-only" id="sidebar-button">
 						<li><a id="navbar-left-button" href="#" data-activates="navbar-left"><i class="material-icons">menu</i></a></li>
 						<li>Feeds list</li>
 					</ul>
@@ -50,11 +50,11 @@ limitations under the License.
 				</div>
 				<a class="right no-padding" href="#/connect" title="Change Informo entrypoint"><i class="material-icons no-padding white-text" style="margin: 0;">exit_to_app</i></a>
 				<strong>Current endpoint URL</strong><br/>
-				<code class="endpoint-url">Not connected</code>
+				<code class="endpoint-url">Not configured</code>
 			</li>
-			<li><a href="#/feeds"><i class="material-icons">rss_feed</i>Your feeds</a></li>
-			<li><div class="divider"></div></li>
-			<li id="sourcelist-load">
+			<li class="navbar-if-connected"><a href="#/feeds"><i class="material-icons">rss_feed</i>Your feeds</a></li>
+			<li class="navbar-if-connected"><div class="divider"></div></li>
+			<li id="sourcelist-load" class="navbar-if-connected">
 				<div class="preloader-wrapper small active">
 					<div class="spinner-layer spinner-green-only">
 						<div class="circle-clipper left">
@@ -67,8 +67,8 @@ limitations under the License.
 					</div>
 				</div>
 			</li>
-			<li id="sourcelist-append"></li>
-			<li><a href="#/discover"><i class="material-icons">add_circle_outline</i> More feeds</a></li>
+			<li id="sourcelist-append" class="navbar-if-connected"></li>
+			<li class="navbar-if-connected"><a href="#/discover"><i class="material-icons">add_circle_outline</i> More feeds</a></li>
 		</ul>
 
 		<main id="main-container">
@@ -165,7 +165,9 @@ limitations under the License.
 			<div id="page-source">
 				<div class="container">
 
-					<h1>Source details</h1>
+					<h1 class="name"></h1>
+
+					<p class="description"></p>
 
 					<div class="content-loader center-align">
 						<div class="preloader-wrapper active">

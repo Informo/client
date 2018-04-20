@@ -17,23 +17,24 @@ import storage from "./storage";
 import informoSources from "./sources";
 import MatrixClient from "./matrix/client";
 import $ from "jquery";
+import Materialize from "materialize-css";
 
 import stringify from "canonical-json";
 import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
 
-const roomAlias = "#informo-test:matrix.org";
+import * as sidebarPage from "./pages/sidebar";
+
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
 const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, "");
 const mxcURLRegexpGen = new RegExp(mxcURLRegexpStr, "g");
 
 var mxClient;
-var mxRoomID;
-var currentHomeserverURL;
+var currentHomeserverURL = null;
+var isConnected = false;
 
 var pendingConnectionPromise = null;
 var connectingToast;
-var connectingToastText;
 
 
 function connectingToastStart(){
@@ -55,16 +56,21 @@ function connectingToastStart(){
 		`), Infinity, "connecting-toast");
 }
 function connectingToastSetContent(html){
-	console.debug("Informo connection progress:", html);
+	console.info("Informo connection progress:", html);
 	$(connectingToast.el).find(".toast-text").html(html);
 }
 
-function connectingToastEnd(html, endClass, timeout = 4000){
+function connectingToastEnd(html, success){
 	connectingToastSetContent(html);
-	$(connectingToast.el).addClass(endClass);
+	$(connectingToast.el).addClass(success === true ? "informo-bg-green" : "red darken-3");
 	$(connectingToast.el).find(".preloader-wrapper").hide();
 
-	setTimeout(() => connectingToast.remove(), timeout);
+	setTimeout(() => connectingToast.remove(), success === true? 3000 : 10000);
+}
+
+/// Returns true if the client is connected to a matrix endpoint and basic Informo data has been fetched
+export function isInformoConnected(){
+	return isConnected;
 }
 
 
@@ -72,108 +78,156 @@ function connectingToastEnd(html, endClass, timeout = 4000){
 export function getConnectedMatrixClient(){
 
 	if(pendingConnectionPromise !== null){
-		console.debug("Matrix Connection already pending");
 		// Resolve with current pending connection
-		return pendingConnectionPromise; // TODO: untested
+		return pendingConnectionPromise;
 	}
 
-	if(mxClient === null || storage.homeserverURL !== currentHomeserverURL){
+	if(isConnected === false || mxClient === null || storage.homeserverURL !== currentHomeserverURL){
 		// Create a new connection
 
 		if(mxClient !== null){
 			// TODO: gently disconnect from current server
+			isConnected = false;
 		}
 
 		connectingToastStart();
-		connectingToastSetContent("Connecting to <code>" + storage.homeserverURL + "</code>");
+		connectingToastSetContent("Connecting to <code>" + storage.homeserverURL + " " + storage.roomAlias + "</code>");
 
 		pendingConnectionPromise = new Promise((resolve, reject) => {
 
-			new Promise((resolve, reject) => {
-				if(storage.homeserverURL === null || storage.homeserverURL !== currentHomeserverURL || storage.accessToken === null){
-					console.debug("Registering as guest");
+			// inner promise that resolves into a matrix client object created either
+			// by reusing stored tokens or by registering as guest
+			let matrixClientPromise = new Promise((resolve, reject) => {
+				// Register as guest only if needed
+				if(storage.homeserverURL === null
+				|| storage.accessToken === null
+				|| (currentHomeserverURL !== null && storage.homeserverURL !== currentHomeserverURL)){
+
+					console.info("Registering as guest");
 					connectingToastSetContent("Registering as guest on <code>" + storage.homeserverURL + "</code>");
+
+					// Resolve to a matrix client on query completion
 					return resolve(MatrixClient.registerGuest(storage.homeserverURL));
 				}
 
+				console.info("Reusing guest account ", storage.userId);
+
+				// Resolve to a matrix client now
 				resolve(new MatrixClient(
 					storage.homeserverURL,
 					storage.accessToken,
 					storage.userId,
 					storage.deviceId
 				));
-			})
+			});
+
+
+			// Once the matrix client is created, we want to to save client
+			// tokens and retrieve main Informo data before resolving
+			// pendingConnectionPromise
+			matrixClientPromise
 				.then((client) => {
+					// save received matrix client information in the storage
 					storage.homeserverURL = client.homeserverURL;
 					storage.accessToken = client.accessToken;
 					storage.userId = client.userID;
 					storage.deviceId = client.deviceID;
 					storage.save();
 
-					$("#navbar-left .endpoint-url").text(storage.homeserverURL);//TODO: move from here
-
+					// Save matrix client object
 					mxClient = client;
 					currentHomeserverURL = storage.homeserverURL;
-					pendingConnectionPromise = null;
+
+					// Update sidebar information
+					sidebarPage.updateState();
+
 					return mxClient;
 				},
 				(err) => {
 					pendingConnectionPromise = null;
-					connectingToastEnd("Could not connect to <code>" + storage.homeserverURL + "</code>", "red darken-3");
+					connectingToastEnd("Could not connect to <code>" + storage.homeserverURL + "</code>", false);
 					throw err;
 				})
-				.then(loadInformo)
+				// Fetch informo related data
+				.then(_loadInformo)
+				// Handle success / errors
 				.then(() => {
-					connectingToastEnd("Connected to Informo through <code>" + storage.homeserverURL + "</code>", "informo-bg-green");
+					connectingToastEnd("Connected to Informo through <code>" + storage.homeserverURL + "</code>", true);
 				},
 				(err) => {
 					pendingConnectionPromise = null;
-					connectingToastEnd("Could not fetch Informo data", "red darken-3");
+					connectingToastEnd("Could not fetch Informo data", false);
 					throw err;
 				})
+				// Now that everything is OK, let's resolve pendingConnectionPromise
 				.then(() => {
+					isConnected = true;
+					sidebarPage.updateState();
+
+					// Resolve main promise with the matrix client
 					resolve(mxClient);
 				});
 		});
+
+		// return this long promise we just created
+		return pendingConnectionPromise;
 	}
 	else {
-		console.debug("Matrix already connected");
-		pendingConnectionPromise = new Promise((resolve, reject) => { resolve(mxClient); });
+		// The client is already connected to the right server
+		return new Promise((resolve, reject) => { resolve(mxClient); });
 	}
-
-
-	return pendingConnectionPromise;
 }
 
-function loadInformo() {
+function _loadInformo() {
 	return new Promise((resolve, reject) => {
-		connectingToastSetContent("Searching Informo room <code>"+roomAlias+"</code>");
-		mxClient.getRoomIDForAlias(roomAlias)
+
+		// This will resolve to a matrix Room ID, either by requesting it using
+		// the room alias or by using the stored room ID
+		let roomIDPromise;
+		if(storage.roomID === null){
+			connectingToastSetContent("Searching Informo room <code>"+storage.roomAlias+"</code>");
+			roomIDPromise = mxClient.getRoomIDForAlias(storage.roomAlias);
+		}
+		else{
+			roomIDPromise = new Promise((resolve, reject) => {
+				resolve(storage.roomID);
+			});
+		}
+
+		roomIDPromise
+			// Save room id in storage
 			.then((roomID) => {
-				connectingToastSetContent("Check if joined Informo room <code>"+roomAlias+"</code>");
-				mxRoomID = roomID;
+				storage.roomID = roomID;
+				storage.save();
+
+				connectingToastSetContent("Check if joined Informo room <code>"+storage.roomAlias+"</code>");
+				// TODO: We can go faster by calling getStateEvent and then join
+				//       room if it fails
 				return mxClient.getJoinedRooms();
 			})
+			// Check if room is joined, and join if necessary
 			.then((rooms) => {
 				let inRoom = false;
 
 				for(let room of rooms) {
-					if(room === mxRoomID) {
+					if(room === storage.roomID) {
 						inRoom = true;
 					}
 				}
 
-				if(inRoom) {
+				if(inRoom === true) {
 					return Promise.resolve();
 				}
 
-				connectingToastSetContent("Joining Informo room <code>"+roomAlias+"</code>");
-				return mxClient.joinRoom(roomAlias);
+				connectingToastSetContent("Joining Informo room <code>"+storage.roomAlias+"</code>");
+				return mxClient.joinRoom(storage.roomAlias);
 			})
+			// Retrieve source list
 			.then(() => {
 				connectingToastSetContent("Fetching Informo source list");
-				return mxClient.getStateEvent(mxRoomID, "network.informo.sources");
+				return mxClient.getStateEvent(storage.roomID, "network.informo.sources");
 			})
+			// Store source list
 			.then((sources) => {
 				informoSources.setSources(sources);
 				if(!informoSources.hasSources()) {
@@ -203,7 +257,7 @@ export function getNews(sourceClassName = null, resetPos = false) {
 			}
 		}
 
-		mxClient.getMessages(mxRoomID, filter, 20, resetPos)
+		mxClient.getMessages(storage.roomID, filter, 20, resetPos)
 			.then((news) => {
 				let p = [];
 				for (let i in news) {

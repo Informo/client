@@ -73,6 +73,10 @@ nav {
 
 }
 
+body.no-sidebar #sidebar-button {
+	display: none;
+}
+
 .informo-article {
 	.informo-article-title {
 		font-weight: bold;

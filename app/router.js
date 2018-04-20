@@ -19,6 +19,7 @@ import * as connectPage from "./pages/connect";
 import * as feedsPage from "./pages/feeds";
 import * as sourcePage from "./pages/source";
 import * as discoverPage from "./pages/discover";
+import * as sidebarPage from "./pages/sidebar";
 
 /// Router page definitions
 const routes = [
@@ -59,10 +60,13 @@ const route404 = {
 class Router {
 	constructor(){
 		this.currentRoute = null;
+		this.lastNavbarState = false;
 
 		$(window).bind("hashchange", () => {
-			if(this.currentRoute === null || !this.matchPath(this.currentVirtualUrl().pathname, this.currentRoute.path))
+			if(this.currentRoute === null || !this.matchPath(this.currentVirtualUrl().pathname, this.currentRoute.path)){
+				//TODO: this does not work if only the path param changes
 				this.updateView();
+			}
 			//TODO: scroll to anchor ix exists && is visible
 		});
 	}
@@ -116,22 +120,33 @@ class Router {
 		elmt.show();
 		this.currentRoute.onInit();
 
-		if(this.currentRoute.hideSidebar === true)
+		if(this.currentRoute.hideSidebar === true){
 			$("body").addClass("no-sidebar");
-		else
+
+			this.lastNavbarState = false;
+		}
+		else{
 			$("body").removeClass("no-sidebar");
+
+			if(this.lastNavbarState === false)
+				sidebarPage.init();
+			this.lastNavbarState = true;
+		}
 
 	}
 
 	/// Return a path parameter value
 	/// example: If route is: `/source/:sourceName`, use `getPathParamValue("sourceName")` to get source name
 	getPathParamValue(paramName){
-		let currentPath = this.currentVirtualUrl().pathname.split("/").filter((a) => a != "");
+		const currentPath = this.currentVirtualUrl().pathname.split("/").filter((a) => a != "");
+		const routePath = this.currentRoute.path.split("/").filter((a) => a != "");
 
-		for(let [i, name] of this.currentRoute.path.split("/").filter((a) => a != "")) {
+		let i = 0;
+		for(let name of routePath) {
 			if(name === (":"+paramName)){
 				return currentPath[i];
 			}
+			i++;
 		}
 		return null;
 	}

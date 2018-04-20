@@ -6,6 +6,7 @@ import Router from "../router";
 import * as matrix from "../matrix";
 import Materialize from "materialize-css";
 
+import * as sidebarPage from "./sidebar";
 
 
 export function init(){
@@ -54,10 +55,13 @@ export function init(){
 		let url = $("#form-connect-homeserver-url").val();
 
 		storage.homeserverURL = url;
+		storage.roomAlias = "#informo-test:matrix.org"; // TODO: make a form for this
+		sidebarPage.updateState();
 		matrix.getConnectedMatrixClient()
 			.then((client) => {
 				console.log("Connected to client: ", client);
 				//TODO: redirect to /feeds if user has already selected some feeds to follow
+				sidebarPage.updateState();
 				Router.navigate("/discover");
 			},
 			(err) => {
