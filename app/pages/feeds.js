@@ -182,7 +182,7 @@ function getEventFilter(){
 
 function clearArticles(){
 	$("#page-feeds .bottom-loader").css("display", "none");
-	$("#article-list > *").remove();
+	$("#page-feeds .article-list > *").remove();
 }
 
 function addArticle(title, description, author, image, source, ts, content, href = null){
@@ -254,5 +254,5 @@ function addArticle(title, description, author, image, source, ts, content, href
 	setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
 	setSanitizedHtmlContent(article.find(".informo-article-content"), content);
 
-	$("#article-list").append(article);
+	$("#page-feeds .article-list").append(article);
 }
