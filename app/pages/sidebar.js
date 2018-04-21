@@ -30,31 +30,20 @@ export function init(){
 
 /// Read current informo connection status and updates its content accordingly
 export function updateState(){
-	// if(Router.getCurrentRoute.hideSideBar == true)
-	// 	return;
-
+	$("#navbar-left .navbar-if-setup").toggle(storage.homeserverURL !== null);
+	$("#navbar-left .navbar-if-notsetup").toggle(storage.homeserverURL === null);
 
 	if(storage.homeserverURL === null){
 		$("#navbar-left .endpoint-url").text("Not setup");
 
-		$("#navbar-left .navbar-if-needsetup").show();
 		$("#navbar-left .navbar-if-connected").hide();
+		$("#navbar-left .navbar-if-notconnected").hide();
 	}
 	else{
-
 		$("#navbar-left .endpoint-url").text(storage.homeserverURL);
 
-		$("#navbar-left .navbar-if-needsetup").hide();
-
-		if(matrix.isInformoConnected()){
-			$("#navbar-left .navbar-if-connected").show();
-			$("#sourcelist-load").hide();
-		}
-		else{
-			$("#navbar-left .navbar-if-needsetup").show();
-			$("#navbar-left .navbar-if-connected").hide();
-		}
-
+		$("#navbar-left .navbar-if-connected").toggle(matrix.isInformoConnected() === true);
+		$("#navbar-left .navbar-if-notconnected").toggle(matrix.isInformoConnected() !== true);
 
 		// Connect to informo
 		matrix.getConnectedMatrixClient()

@@ -48,13 +48,16 @@ limitations under the License.
 				<div class="center">
 					<img src="static/img/logo-full-white-128.png">
 				</div>
-				<a class="right no-padding" href="#/connect" title="Change Informo entrypoint"><i class="material-icons no-padding white-text" style="margin: 0;">exit_to_app</i></a>
+				<a class="right no-padding navbar-if-setup" href="#/connect" title="Change Informo entrypoint"><i class="material-icons no-padding white-text" style="margin: 0;">exit_to_app</i></a>
 				<strong>Current endpoint URL</strong><br/>
 				<code class="endpoint-url">Not configured</code>
 			</li>
+
+			<li class="navbar-if-notsetup"><a href="#/connect"><i class="material-icons">error_outline</i>Select a server</a></li>
+
 			<li class="navbar-if-connected"><a href="#/feeds"><i class="material-icons">rss_feed</i>Your feeds</a></li>
 			<li class="navbar-if-connected"><div class="divider"></div></li>
-			<li id="sourcelist-load" class="navbar-if-connected">
+			<li id="sourcelist-load" class="navbar-if-notconnected">
 				<div class="preloader-wrapper small active">
 					<div class="spinner-layer spinner-green-only">
 						<div class="circle-clipper left">

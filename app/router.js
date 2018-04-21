@@ -26,25 +26,21 @@ const routes = [
 	{
 		path: "/connect",
 		elmt: "#page-connect",
-		hideSidebar: true,
 		onInit: connectPage.init,
 	},
 	{
 		path: "/feeds",
 		elmt: "#page-feeds",
-		hideSidebar: false,
 		onInit: feedsPage.init,
 	},
 	{
 		path: "/source/:sourceName",
 		elmt: "#page-source",
-		hideSidebar: false,
 		onInit: sourcePage.init,
 	},
 	{
 		path: "/discover",
 		elmt: "#page-discover",
-		hideSidebar: false,
 		onInit: discoverPage.init,
 	},
 ];
@@ -53,7 +49,6 @@ const routes = [
 const route404 = {
 	path: "/404",
 	elmt: "#page-404",
-	hideSidebar: false,
 	onInit: function(){},
 };
 
@@ -73,6 +68,8 @@ class Router {
 			}
 			//TODO: scroll to anchor ix exists && is visible
 		});
+
+		sidebarPage.init();
 	}
 
 	/// Route object of the currently displayed page
@@ -123,19 +120,6 @@ class Router {
 
 		elmt.show();
 		this.currentRoute.onInit();
-
-		if(this.currentRoute.hideSidebar === true){
-			$("body").addClass("no-sidebar");
-
-			this.lastNavbarState = false;
-		}
-		else{
-			$("body").removeClass("no-sidebar");
-
-			if(this.lastNavbarState === false)
-				sidebarPage.init();
-			this.lastNavbarState = true;
-		}
 
 	}
 
