@@ -39,7 +39,7 @@ const routes = [
 		path: "/source/:sourceName",
 		elmt: "#page-source",
 		onInit: sourcePage.init,
-		onRemoved: null,
+		onRemoved: sourcePage.remove,
 	},
 	{
 		path: "/discover",

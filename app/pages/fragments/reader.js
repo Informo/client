@@ -108,27 +108,32 @@ export class Reader {
 		console.assert(typeof compact === "boolean");
 
 		this.compact = compact;
-		this.id = readerId++;
 
-		this.loaded = false;
+		this.id = readerId++;
 		this.scrollListener = null;
-		this.isLoadingBottom = false;
-		this.noMorePosts = false;
 
 		this.body = template[this.compact === true ? 1 : 0].body.clone();
-		this.body.find(">:not(.request-loader)").hide();
 
+		this.reset();
 
 		container.append(this.body);
 		this.body.find(".article-list").collapsible();
 	}
-	/// Call this before removing the reader. Will unbind scroll event
-	destroy(){
+	/// Remove all feeds
+	reset(){
+		this.loaded = false;
+		this.isLoadingBottom = false;
+		this.noMorePosts = false;
+
+		this.body.find(">.request-loader").show();
+		this.body.find(">:not(.request-loader)").hide();
+		this.body.find(".article-list").empty();
+	}
+
+	deactivate(){
 		if(this.scrollListener !== null){
 			$(window).unbind("scroll.readerBottomLoad");
 		}
-
-		this.body.parent().remove(this.body);
 	}
 
 	/// Make the reader fetch news from multiple feeds
@@ -159,10 +164,6 @@ export class Reader {
 			});
 	}
 
-	/// Remove all feeds
-	clear(){
-		this.body.find(".article-list").empty();
-	}
 
 
 	_appendFeedArticles(resetPos = false, reportProgress = false) {

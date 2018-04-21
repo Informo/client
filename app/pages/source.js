@@ -29,7 +29,8 @@ export function init(){
 	if(reader === null){
 		reader = new Reader($("#page-source .reader"), true);
 	}
-	reader.clear();
+	else
+		reader.reset();
 
 	$("#page-source .content-loader").show();
 	$("#page-source .content").hide();
@@ -58,4 +59,8 @@ export function init(){
 		});
 
 
+}
+
+export function remove(){
+	reader.deactivate();
 }
