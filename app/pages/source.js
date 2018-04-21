@@ -19,9 +19,17 @@ import Router from "../router";
 import Sources from "../sources";
 import * as matrix from "../matrix";
 import {eventPrefix} from "../const";
+import {Reader} from "./fragments/reader";
 import $ from "jquery";
 
+let reader = null;
+
 export function init(){
+
+	if(reader === null){
+		reader = new Reader($("#page-source .reader"), true);
+	}
+	reader.clear();
 
 	$("#page-source .content-loader").show();
 	$("#page-source .content").hide();
@@ -41,6 +49,7 @@ export function init(){
 				$("#page-source .description").text("This source use the following public key: " + source.publicKey);
 
 				// TODO: fetch news from this source
+				reader.setFeed([sourceClassName]);
 			}
 
 			$("#page-source .content-loader").hide();

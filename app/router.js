@@ -27,21 +27,25 @@ const routes = [
 		path: "/connect",
 		elmt: "#page-connect",
 		onInit: connectPage.init,
+		onRemoved: null,
 	},
 	{
 		path: "/feeds",
 		elmt: "#page-feeds",
 		onInit: feedsPage.init,
+		onRemoved: null,
 	},
 	{
 		path: "/source/:sourceName",
 		elmt: "#page-source",
 		onInit: sourcePage.init,
+		onRemoved: null,
 	},
 	{
 		path: "/discover",
 		elmt: "#page-discover",
 		onInit: discoverPage.init,
+		onRemoved: null,
 	},
 ];
 
@@ -106,6 +110,10 @@ class Router {
 			return;
 		}
 
+		$("#main-container > *").hide();
+		if(this.currentRoute !== null && this.currentRoute.onRemoved !== null)
+			this.currentRoute.onRemoved();
+
 		let routeIndex = this._findCurrentRoute();
 		if(routeIndex >= 0) {
 			this.currentRoute = routes[routeIndex];
@@ -115,9 +123,8 @@ class Router {
 			this.currentRoute = route404;
 		}
 
-		$("#main-container > *").hide();
-		let elmt = $("#main-container").find(this.currentRoute.elmt);
 
+		let elmt = $("#main-container").find(this.currentRoute.elmt);
 		elmt.show();
 		this.currentRoute.onInit();
 

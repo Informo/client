@@ -257,7 +257,13 @@ export function getNews(sourceClassName = null, resetPos = false) {
 			}
 		}
 
-		mxClient.getMessages(storage.roomID, filter, 20, resetPos)
+		let matrixClient = null;
+
+		getConnectedMatrixClient()
+			.then((client) => {
+				matrixClient = client;
+				return client.getMessages(storage.roomID, filter, 20, resetPos);
+			})
 			.then((news) => {
 				let p = [];
 				for (let i in news) {
@@ -299,13 +305,13 @@ export function getNews(sourceClassName = null, resetPos = false) {
 					if (medias) {
 						for (let m of medias) {
 							let parts = getPartsFromMXCURL(m);
-							let dlURL = mxClient.homeserverURL
+							let dlURL = matrixClient.homeserverURL
 								+ "/_matrix/media/r0/download/" + parts.serverName
 								+ "/" + parts.mediaID;
 							n.content.content = n.content.content.replace(m, dlURL);
 						}
 						let thumbnailParts = getPartsFromMXCURL(medias[0]);
-						n.content.thumbnail = mxClient.homeserverURL
+						n.content.thumbnail = matrixClient.homeserverURL
 							+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
 							+ "/" + thumbnailParts.mediaID;
 					}

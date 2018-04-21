@@ -112,10 +112,11 @@ body.no-sidebar #sidebar-button {
 		.informo-article-image {
 			max-width: 25%;
 			margin: -15px -15px -15px 0;
-		}
-		.informo-article-image img {
-			max-height: 200px;
-			max-width: 100%;
+
+			img {
+				max-height: 200px;
+				max-width: 100%;
+			}
 		}
 	}
 }
