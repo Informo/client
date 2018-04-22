@@ -38,7 +38,7 @@ export function init(){
 		reader = new Reader($("#page-feeds .reader"), true);//TODO: make large reader
 	}
 
-	reader.setFeed(["*"]);// TODO: only fetch user selected feeds
+	reader.setFeed(storage.userSources);
 
 }
 
