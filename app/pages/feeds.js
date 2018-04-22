@@ -123,7 +123,7 @@ function updateEndpointUrl(url){
 }
 
 function displayNews(resetPos = false, bottomLoad = false) {
-	return matrix.getNews(currentSource, resetPos)
+	return matrix.getNews([currentSource], resetPos)
 		.then((news) => {
 			if (!(news && news.length)) {
 				noMorePosts = true;

@@ -26,8 +26,17 @@ import * as matrix from "../../matrix";
 const template = [
 	{
 		// Paned / large view
-		body: $(``),// TODO
-		article: $(``),// TODO
+		body: $(`
+			<div>
+
+
+			</div>
+
+		`),
+		article: $(`
+
+
+		`),
 	},
 	{
 		// Compact view
@@ -124,6 +133,7 @@ export class Reader {
 		this.loaded = false;
 		this.isLoadingBottom = false;
 		this.noMorePosts = false;
+		this.sourceClassNames = null;
 
 		this.body.find(">.request-loader").show();
 		this.body.find(">:not(.request-loader)").hide();
@@ -140,6 +150,9 @@ export class Reader {
 	/// sourceClassNames: array of SourceClassName
 	setFeed(sourceClassNames){
 		console.assert(sourceClassNames.constructor === Array);
+
+		if(this.loaded === true)
+			this.reset();
 
 		this.sourceClassNames = sourceClassNames;
 
@@ -175,7 +188,7 @@ export class Reader {
 				if(reportProgress === true)
 					this.body.find(".request-loader .request-loader-text").text("Fetching news...");
 
-				return matrix.getNews(this.sourceClassNames[0], resetPos);// TODO: display all sourceClassNames
+				return matrix.getNews(this.sourceClassNames, resetPos);// TODO: display all sourceClassNames
 			})
 			.then((news) => {
 				if (!(news && news.length)) {

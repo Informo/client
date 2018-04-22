@@ -16,6 +16,7 @@
 import storage from "./storage";
 import informoSources from "./sources";
 import MatrixClient from "./matrix/client";
+import {eventPrefix} from "./const";
 import $ from "jquery";
 import Materialize from "materialize-css";
 
@@ -239,24 +240,38 @@ function _loadInformo() {
 
 }
 
-export function getNews(sourceClassName = null, resetPos = false) {
-	return new Promise((resolve, reject) => {
-		let filter = {types: [],senders: []};
+/// Return a promise that resolves into a list of articles
+/// sourceClassNames: List of source class names that will be fetched. null to fetch all informo official sources
+export function getNews(sourceClassNames, resetPos = false) {
+	console.assert(sourceClassNames === null || sourceClassNames.constructor === Array);
 
-		if(sourceClassName) {
-			filter.types.push(sourceClassName);
-			for(let publisher of informoSources.sources[sourceClassName].publishers) {
+	// Build event filter
+	let filter = {types: [],senders: []};
+
+	if(sourceClassNames === null){
+		//Fetch everything
+		for(let className of informoSources.sources) {
+			filter.types.push(className);
+			for(let publisher of informoSources.sources[className].publishers) {
 				filter.senders.push(publisher);
 			}
-		} else {
-			for(let className in informoSources.sources) {
+		}
+	}
+	else{
+		for(let className of sourceClassNames) {
+			if(informoSources.sources[className]){
 				filter.types.push(className);
 				for(let publisher of informoSources.sources[className].publishers) {
 					filter.senders.push(publisher);
 				}
 			}
+			else{
+				console.warn("Unknown source class name: ", className);
+			}
 		}
+	}
 
+	return new Promise((resolve, reject) => {
 		let matrixClient = null;
 
 		getConnectedMatrixClient()
