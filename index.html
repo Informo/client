@@ -76,102 +76,126 @@ limitations under the License.
 
 		<main id="main-container">
 			<!-- =========================================== -->
-			<div id="page-connect">
-				<div class="container">
+			<div id="page-connect" class="container">
 
-					<form id="form-connect-homeserver">
-						<div class="card informo-bg-green-light center-small">
-							<div class="card-content">
-								<span class="card-title">Homeserver connection</span>
-								<p>
-									<form>
-										<div class="input-field">
-											<div class="material-icons prefix">language</div>
-											<input name="homeserver-url" id="form-connect-homeserver-url" type="url" class="validate">
-											<label for="homeserver-url">Server URL</label>
-										</div>
-										<div class="input-field">
-											<div class="material-icons prefix">home</div>
-											<input name="room-alias" id="form-connect-room-alias" type="text" class="validate">
-											<label for="room-alias">Room alias</label>
-										</div>
-									</form>
-								</p>
-							</div>
-							<div class="card-action">
-
-								<button class="btn waves-effect waves-light" type="submit" name="action">Connect
-									<i class="material-icons right">send</i>
-								</button>
-
-							</div>
+				<form id="form-connect-homeserver">
+					<div class="card informo-bg-green-light center-small">
+						<div class="card-content">
+							<span class="card-title">Homeserver connection</span>
+							<p>
+								<form>
+									<div class="input-field">
+										<div class="material-icons prefix">language</div>
+										<input name="homeserver-url" id="form-connect-homeserver-url" type="url" class="validate">
+										<label for="homeserver-url">Server URL</label>
+									</div>
+									<div class="input-field">
+										<div class="material-icons prefix">home</div>
+										<input name="room-alias" id="form-connect-room-alias" type="text" class="validate">
+										<label for="room-alias">Room alias</label>
+									</div>
+								</form>
+							</p>
 						</div>
-					</form>
+						<div class="card-action">
+
+							<button class="btn waves-effect waves-light" type="submit" name="action">Connect
+								<i class="material-icons right">send</i>
+							</button>
+
+						</div>
+					</div>
+				</form>
 
 
-					<p>
-						TODO<br/>
-						This is a welcome text where we explain our philosophy (matrix server keeps you anonymous, we don't store anything on servers) and very quickly how informo works (with links to more detailed information)<br/>
-						We'll need to explain why users need to chose carefully a entrypoint
+				<p>
+					TODO<br/>
+					This is a welcome text where we explain our philosophy (matrix server keeps you anonymous, we don't store anything on servers) and very quickly how informo works (with links to more detailed information)<br/>
+					We'll need to explain why users need to chose carefully a entrypoint
 
-						<table class="highlight">
-							<thead>
-								<tr><th>Server URL</th><th>Room</th><th>Location</th><th>Owner</th><th>Additional info.</th></tr>
-							</thead>
-							<tbody id="connect-homeserver-list">
-							</tbody>
-						</table>
-					</p>
-				</div>
+					<table class="highlight">
+						<thead>
+							<tr><th>Server URL</th><th>Room</th><th>Location</th><th>Owner</th><th>Additional info.</th></tr>
+						</thead>
+						<tbody id="connect-homeserver-list">
+						</tbody>
+					</table>
+				</p>
 			</div>
 			<!-- =========================================== -->
-			<div id="page-feeds">
+			<div id="page-feeds" class="container">
+				<h1>Your feeds</h1>
+				<div class="reader"></div>
+			</div>
+			<!-- =========================================== -->
+			<div id="page-source" class="container">
+				<div class="content-loader center-align">
+					<div class="preloader-wrapper active">
+						<div class="spinner-layer spinner-green-only">
+							<div class="circle-clipper left">
+								<div class="circle"></div>
+							</div><div class="gap-patch">
+								<div class="circle"></div>
+							</div><div class="circle-clipper right">
+								<div class="circle"></div>
+							</div>
+						</div>
 
-				<div class="container">
-					<h1>All feeds</h1>
+					</div>
+					<div class="loader-text flow-text"></div>
+				</div>
+
+				<div class="content" style="display: none">
+
+					<h1>
+						<a class="add-button btn-floating waves-effect waves-light informo-bg-green" title="Add this source"><i class="material-icons">add</i></a>
+						<a class="remove-button btn-floating waves-effect waves-light informo-bg-green" title="Remove this source"><i class="material-icons">remove</i></a>
+						<span class="name"></span>
+					</h1>
+
+					<h3>Who are they?</h3>
+					<p class="description"></p>
+
+					<h3>Latest news:</h3>
 
 					<div class="reader"></div>
 				</div>
 			</div>
 			<!-- =========================================== -->
-			<div id="page-source">
-				<div class="container">
-					<div class="content-loader center-align">
-						<div class="preloader-wrapper active">
-							<div class="spinner-layer spinner-green-only">
-								<div class="circle-clipper left">
-									<div class="circle"></div>
-								</div><div class="gap-patch">
-									<div class="circle"></div>
-								</div><div class="circle-clipper right">
-									<div class="circle"></div>
-								</div>
+			<div id="page-discover" class="container">
+
+					<ul class="tabs center">
+						<li class="tab"><a href="#page-discover-official" class="active">Official feeds</a></li>
+						<li class="tab"><a href="#page-discover-unofficial">Unofficial feed</a></li>
+					</ul>
+					<div id="page-discover-official">
+						<h1>Discover new feeds</h1>
+						<div class="row">
+							<div class="input-field col s6">
+								<i class="material-icons prefix">search</i>
+								<input id="page-discover-source-name" type="text">
+								<label for="page-discover-source-name">Source name</label>
 							</div>
-
+							<div class="input-field col s3">
+								<i class="material-icons prefix">location_on</i>
+								<input id="page-discover-source-country" type="text">
+								<label for="page-discover-source-country">Country</label>
+							</div>
+							<div class="input-field col s3">
+								<i class="material-icons prefix">language</i>
+								<input id="page-discover-source-language" type="text">
+								<label for="page-discover-source-language">Language</label>
+							</div>
 						</div>
-						<div class="loader-text flow-text"></div>
+						<div class="card-container"></div>
 					</div>
+					<div id="page-discover-unofficial">
+						<h1>Unofficial feed setup</h1>
 
-					<div class="content" style="display: none">
-
-						<h1>
-							<span class="name"></span>
-							<a class="add-button btn-floating waves-effect waves-light informo-bg-green" title="Add this source"><i class="material-icons">star</i></a>
-							<a class="remove-button btn-floating waves-effect waves-light informo-bg-green" title="Remove this source"><i class="material-icons">remove</i></a>
-						</h1>
-
-						<h3>Who are they?</h3>
-						<p class="description"></p>
-
-						<h3>Latest news:</h3>
-
-						<div class="reader"></div>
 					</div>
 				</div>
-			</div>
-			<!-- =========================================== -->
-			<div id="page-discover">
-				<h1>Discover new feeds</h1>
+
+
 			</div>
 			<!-- =========================================== -->
 			<div id="page-404" class="center">
