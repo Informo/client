@@ -241,16 +241,16 @@ function _loadInformo() {
 }
 
 /// Return a promise that resolves into a list of articles
-/// sourceClassNames: List of source class names that will be fetched. null to fetch all informo official sources
+/// sourceClassNames: List of source class names that will be fetched. Set ["*"] to fetch all informo official sources
 export function getNews(sourceClassNames, resetPos = false) {
-	console.assert(sourceClassNames === null || sourceClassNames.constructor === Array);
+	console.assert(sourceClassNames.constructor === Array);
 
 	// Build event filter
 	let filter = {types: [],senders: []};
 
-	if(sourceClassNames === null){
+	if(sourceClassNames.length === 1 &&  sourceClassNames[0] === "*"){
 		//Fetch everything
-		for(let className of informoSources.sources) {
+		for(let className in informoSources.sources) {
 			filter.types.push(className);
 			for(let publisher of informoSources.sources[className].publishers) {
 				filter.senders.push(publisher);

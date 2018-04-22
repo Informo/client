@@ -179,7 +179,7 @@ export class Reader {
 
 
 
-	_appendFeedArticles(resetPos = false, reportProgress = false) {
+	_appendFeedArticles(resetPos, reportProgress = false) {
 		if(reportProgress === true)
 			this.body.find(".request-loader .request-loader-text").text("Waiting connection to Informo...");
 
@@ -188,7 +188,7 @@ export class Reader {
 				if(reportProgress === true)
 					this.body.find(".request-loader .request-loader-text").text("Fetching news...");
 
-				return matrix.getNews(this.sourceClassNames, resetPos);// TODO: display all sourceClassNames
+				return matrix.getNews(this.sourceClassNames, resetPos);
 			})
 			.then((news) => {
 				if (!(news && news.length)) {
