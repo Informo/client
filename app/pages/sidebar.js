@@ -58,20 +58,14 @@ let lastSourceList = null;
 
 /// Updates the list of sources in the sidebar
 export function updateUserSourceList(){
-	// TODO: currently, we display all existing sources here.
-	//       We should implement a way to "favorite" specific sources so
-	//       only them are displayed here.
-
-
-
-	if(informoSources.sources !== lastSourceList){
+	if(storage.userSources !== lastSourceList){
 
 		$(".informo-source-link").remove();
 		let appender = $("#sourcelist-append");
 
 		$("#sourcelist-load").hide();
 
-		for(let className in informoSources.sources){
+		for(let className of storage.userSources){
 
 			if(className.startsWith(eventPrefix)){
 				let evName = className.substr(eventPrefix.length);

@@ -17,12 +17,16 @@
 
 import Router from "../router";
 import Sources from "../sources";
+import Storage from "../storage";
 import * as matrix from "../matrix";
 import {eventPrefix} from "../const";
 import {Reader} from "./fragments/reader";
+import * as sidebar from "./sidebar";
 import $ from "jquery";
 
 let reader = null;
+let setup = false;
+let sourceClassName = null;
 
 export function init(){
 
@@ -36,20 +40,28 @@ export function init(){
 	$("#page-source .content").hide();
 	$("#page-source .content-loader .loader-text").text("Waiting connection to Informo...");
 
+	sourceClassName = eventPrefix + Router.getPathParamValue("sourceName");
+
 	matrix.getConnectedMatrixClient()
 		.then(() => {
-			const sourceClassName = eventPrefix + Router.getPathParamValue("sourceName");
 			const source = Sources.sources[sourceClassName];
 
 			if(!source){
 				$("#page-source .name").text("Unknown source");
 				$("#page-source .description").text("This source does not exist");
+
+				$("#page-source .add-button").hide();
+				$("#page-source .remove-button").hide();
 			}
 			else{
 				$("#page-source .name").text(source.name);
 				$("#page-source .description").text("This source use the following public key: " + source.publicKey);
 
-				// TODO: fetch news from this source
+				const isSourceAdded = Storage.userSources.indexOf(sourceClassName) >= 0;
+				$("#page-source .add-button").toggle(isSourceAdded === false);
+				$("#page-source .remove-button").toggle(isSourceAdded === true);
+
+				// Display news for this source
 				reader.setFeed([sourceClassName]);
 			}
 
@@ -58,9 +70,40 @@ export function init(){
 
 		});
 
+	if(setup === false){
+		// Set button callbacks
+		$("#page-source .add-button").bind("click", ()=>{
+			const sourceIndex = Storage.userSources.indexOf(sourceClassName);
+			if(sourceIndex < 0){
+				Storage.userSources.push(sourceClassName);
+				Storage.save();
+				_updateAddRmButtons();
+				sidebar.updateUserSourceList();
+			}
+		});
+		$("#page-source .remove-button").bind("click", ()=>{
+			const sourceIndex = Storage.userSources.indexOf(sourceClassName);
+			if(sourceIndex >= 0){
+				Storage.userSources.splice(sourceIndex, 1);
+				Storage.save();
+				_updateAddRmButtons();
+				sidebar.updateUserSourceList();
+			}
+		});
+
+		setup = true;
+	}
+
 
 }
 
 export function remove(){
 	reader.deactivate();
+}
+
+
+function _updateAddRmButtons(){
+	const isSourceAdded = Storage.userSources.indexOf(sourceClassName) >= 0;
+	$("#page-source .add-button").toggle(isSourceAdded === false);
+	$("#page-source .remove-button").toggle(isSourceAdded === true);
 }

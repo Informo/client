@@ -111,14 +111,14 @@ export function getConnectedMatrixClient(){
 					return resolve(MatrixClient.registerGuest(storage.homeserverURL));
 				}
 
-				console.info("Reusing guest account ", storage.userId);
+				console.info("Reusing guest account ", storage.userID);
 
 				// Resolve to a matrix client now
 				resolve(new MatrixClient(
 					storage.homeserverURL,
 					storage.accessToken,
-					storage.userId,
-					storage.deviceId
+					storage.userID,
+					storage.deviceID
 				));
 			});
 
@@ -131,8 +131,8 @@ export function getConnectedMatrixClient(){
 					// save received matrix client information in the storage
 					storage.homeserverURL = client.homeserverURL;
 					storage.accessToken = client.accessToken;
-					storage.userId = client.userID;
-					storage.deviceId = client.deviceID;
+					storage.userID = client.userID;
+					storage.deviceID = client.deviceID;
 					storage.save();
 
 					// Save matrix client object

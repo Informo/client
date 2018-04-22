@@ -17,20 +17,23 @@ class Storage {
 	constructor(){
 		this.homeserverURL    = window.localStorage.getItem("homeserverURL");
 		this.accessToken      = window.localStorage.getItem("accessToken");
-		this.userId           = window.localStorage.getItem("userId");
-		this.deviceId         = window.localStorage.getItem("deviceId");
+		this.userID           = window.localStorage.getItem("userID");
+		this.deviceID         = window.localStorage.getItem("deviceID");
 		this.roomAlias        = window.localStorage.getItem("roomAlias");
 		this.roomID           = window.localStorage.getItem("roomID");
+		this.userSources      = JSON.parse(window.localStorage.getItem("userSources"));
+		if(this.userSources === null) this.userSources = [];
 	}
 
 	save(){
 		window.localStorage.setItem("homeserverURL", this.homeserverURL);
 		window.localStorage.setItem("accessToken", this.accessToken);
-		window.localStorage.setItem("userId", this.userId);
-		window.localStorage.setItem("deviceId", this.deviceId);
+		window.localStorage.setItem("userID", this.userID);
+		window.localStorage.setItem("deviceID", this.deviceID);
 		window.localStorage.setItem("roomAlias", this.roomAlias);
 		window.localStorage.setItem("roomID", this.roomID);
+		window.localStorage.setItem("userSources", JSON.stringify(this.userSources));
 	}
 }
 
-export default (new Storage)
+export default (new Storage);
