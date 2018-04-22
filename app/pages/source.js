@@ -17,7 +17,7 @@
 
 import Router from "../router";
 import Sources from "../sources";
-import Storage from "../storage";
+import storage from "../storage";
 import * as matrix from "../matrix";
 import {eventPrefix} from "../const";
 import {Reader} from "./fragments/reader";
@@ -44,6 +44,7 @@ export function init(){
 
 	matrix.getConnectedMatrixClient()
 		.then(() => {
+			// TODO: content will be inserted multiple times if we change page during loading
 			const source = Sources.sources[sourceClassName];
 
 			if(!source){
@@ -57,7 +58,7 @@ export function init(){
 				$("#page-source .name").text(source.name);
 				$("#page-source .description").text("This source use the following public key: " + source.publicKey);
 
-				const isSourceAdded = Storage.userSources.indexOf(sourceClassName) >= 0;
+				const isSourceAdded = storage.userSources.indexOf(sourceClassName) >= 0;
 				$("#page-source .add-button").toggle(isSourceAdded === false);
 				$("#page-source .remove-button").toggle(isSourceAdded === true);
 
@@ -73,19 +74,19 @@ export function init(){
 	if(setup === false){
 		// Set button callbacks
 		$("#page-source .add-button").bind("click", ()=>{
-			const sourceIndex = Storage.userSources.indexOf(sourceClassName);
+			const sourceIndex = storage.userSources.indexOf(sourceClassName);
 			if(sourceIndex < 0){
-				Storage.userSources.push(sourceClassName);
-				Storage.save();
+				storage.userSources.push(sourceClassName);
+				storage.save();
 				_updateAddRmButtons();
 				sidebar.updateUserSourceList();
 			}
 		});
 		$("#page-source .remove-button").bind("click", ()=>{
-			const sourceIndex = Storage.userSources.indexOf(sourceClassName);
+			const sourceIndex = storage.userSources.indexOf(sourceClassName);
 			if(sourceIndex >= 0){
-				Storage.userSources.splice(sourceIndex, 1);
-				Storage.save();
+				storage.userSources.splice(sourceIndex, 1);
+				storage.save();
 				_updateAddRmButtons();
 				sidebar.updateUserSourceList();
 			}
@@ -103,7 +104,7 @@ export function remove(){
 
 
 function _updateAddRmButtons(){
-	const isSourceAdded = Storage.userSources.indexOf(sourceClassName) >= 0;
+	const isSourceAdded = storage.userSources.indexOf(sourceClassName) >= 0;
 	$("#page-source .add-button").toggle(isSourceAdded === false);
 	$("#page-source .remove-button").toggle(isSourceAdded === true);
 }

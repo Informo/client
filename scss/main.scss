@@ -122,15 +122,45 @@ body.no-sidebar #sidebar-button {
 }
 
 
+#page-discover {
+	.card-container {
+		display: flex;
+		align-items: flex-start;
+		flex-wrap: wrap;
+
+		> .source-card {
+			margin: 1em;
+		}
+	}
+}
+#page-source {
+	.add-button, .remove-button {
+		margin-left: calc(-40px - 1em);
+	}
+}
+
 
 
 .informo-bg-green {
 	background-color: $primary-color;
 	color: #fff;
+
+	&:hover{
+		&.btn, &.btn-floating, &.btn-large, &.btn-flat {
+			background-color: lighten($primary-color, 10%);
+		}
+	}
 }
+
 .informo-bg-green-light {
-	background-color:$primary-color-light;
+	background-color: $primary-color-light;
 	color: #000;
+
+	&:hover{
+		&.btn, &.btn-floating, &.btn-large, &.btn-flat {
+			background-color: darken($primary-color-light, 10%);
+		}
+	}
 }
 .center-small {
 	max-width: 500px;
