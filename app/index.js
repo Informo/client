@@ -24,8 +24,7 @@ import Router from "./router";
 
 $(document).ready(function(){
 
-	$("#navbar-left-button").sideNav({closeOnClick: true});
-	$("#article-list").collapsible();
+	$("#sidebar-button").sideNav({closeOnClick: true});
 	$(".modal").modal();
 
 	if(!storage.homeserverURL){

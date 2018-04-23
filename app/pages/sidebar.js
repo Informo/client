@@ -23,6 +23,25 @@ import informoSources from "../sources";
 import {eventPrefix} from "../const";
 
 
+const sourceButton = $(`
+	<li class="informo-source-link">
+		<a class="source-link">
+			<span class="source-name">{{NAME}}</span>
+			<span class="badge new informo-bg-green">{{UNREAD_CNT}}</span>
+		</a>
+		<a class="dropdown-button" href="#" data-activates=""><i class="icon-more material-icons">more_horiz</i></a>
+
+		<ul id='dropdown1' class='dropdown-content'>
+			<li><a class="source-page-link"><i class="material-icons">pageview</i>View source page</a></li>
+			<li><a class="source-remove"><i class="material-icons">remove</i>Remove source</a></li>
+		</ul>
+
+	</li>
+
+	`);
+
+
+
 export function init(){
 	updateState();
 }
@@ -30,20 +49,20 @@ export function init(){
 
 /// Read current informo connection status and updates its content accordingly
 export function updateState(){
-	$("#navbar-left .navbar-if-setup").toggle(storage.homeserverURL !== null);
-	$("#navbar-left .navbar-if-notsetup").toggle(storage.homeserverURL === null);
+	$("#sidebar .navbar-if-setup").toggle(storage.homeserverURL !== null);
+	$("#sidebar .navbar-if-notsetup").toggle(storage.homeserverURL === null);
 
 	if(storage.homeserverURL === null){
-		$("#navbar-left .endpoint-url").text("Not setup");
+		$("#sidebar .endpoint-url").text("Not setup");
 
-		$("#navbar-left .navbar-if-connected").hide();
-		$("#navbar-left .navbar-if-notconnected").hide();
+		$("#sidebar .navbar-if-connected").hide();
+		$("#sidebar .navbar-if-notconnected").hide();
 	}
 	else{
-		$("#navbar-left .endpoint-url").text(storage.homeserverURL);
+		$("#sidebar .endpoint-url").text(storage.homeserverURL);
 
-		$("#navbar-left .navbar-if-connected").toggle(matrix.isInformoConnected() === true);
-		$("#navbar-left .navbar-if-notconnected").toggle(matrix.isInformoConnected() !== true);
+		$("#sidebar .navbar-if-connected").toggle(matrix.isInformoConnected() === true);
+		$("#sidebar .navbar-if-notconnected").toggle(matrix.isInformoConnected() !== true);
 
 		// Connect to informo
 		matrix.getConnectedMatrixClient()
@@ -56,36 +75,63 @@ export function updateState(){
 
 let lastSourceList = null;
 
+
 /// Updates the list of sources in the sidebar
 export function updateUserSourceList(){
+
+
 	if(storage.userSources !== lastSourceList){
 
-		$(".informo-source-link").remove();
+		$("#sidebar .informo-source-link").remove();
 		let appender = $("#sourcelist-append");
 
-		$("#sourcelist-load").hide();
+		$("#sidebar #sourcelist-load").hide();
+
+		let i = 0;
 
 		for(let className of storage.userSources){
 
 			if(className.startsWith(eventPrefix)){
 				let evName = className.substr(eventPrefix.length);
 
-				let li = $(`
-					<li class="informo-source-link">
-						<a href="{{LINK}}"><span class="link">{{NAME}}</span><span class="new badge informo-bg-green" data-badge-caption="unread">{{UNREAD_CNT}}</span></a>
-					</li>`);
+				let li = sourceButton.clone();
 
-				li.find("a")
-					.attr("href", "#/source/" + encodeURI(evName))
-					.find(".link")
-					.text(informoSources.sources[className].name);
-
+				li.find("a.source-link").attr("href", "#/source/" + encodeURI(evName));//TODO: should open the feed page filtered with this source
+				li.find("a.source-page-link").attr("href", "#/source/" + encodeURI(evName));
+				li.find(".source-name").text(informoSources.sources[className].name);
 
 				li.find(".badge")
 					.text(informoSources.sources[className].unread)
 					.addClass(informoSources.sources[className].unread === 0 ? "hide" : null);
 
+
+				li.find(".dropdown-content").attr("id", "sidebar-dropdown-"+i);
+				li.find(".dropdown-button").attr("data-activates", "sidebar-dropdown-"+i);
+				i++;
+
 				appender.before(li);
+
+				// Setup dropdown behavior
+				li.find(".dropdown-button").dropdown({
+					inDuration: 300,
+					outDuration: 225,
+					constrainWidth: false,
+					hover: false,
+					gutter: 0,
+					belowOrigin: true,
+					alignment: "right",
+					stopPropagation: true,
+				});
+
+				li.find(".source-remove").bind("click", () => {
+					const sourceIndex = storage.userSources.indexOf(className);
+					if(sourceIndex >= 0){
+						storage.userSources.splice(sourceIndex, 1);
+						storage.save();
+						updateUserSourceList();
+					}
+				});
+
 			}
 			else{
 				console.warn("network.informo.sources contains '" + className + "' that does not match 'network.informo.news.*' format");

@@ -32,7 +32,7 @@ limitations under the License.
 						<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
 					</a>
 					<ul class="left hide-on-large-only" id="sidebar-button">
-						<li><a id="navbar-left-button" href="#" data-activates="navbar-left"><i class="material-icons">menu</i></a></li>
+						<li><a id="sidebar-button" href="#" data-activates="sidebar"><i class="material-icons">menu</i></a></li>
 						<li>Feeds list</li>
 					</ul>
 					<div class="right">
@@ -43,7 +43,7 @@ limitations under the License.
 		</div>
 
 
-		<ul id="navbar-left" class="side-nav show-on-medium-and-up">
+		<ul id="sidebar" class="side-nav show-on-medium-and-up">
 			<li class="navbar-header informo-bg-green">
 				<div class="center">
 					<img src="static/img/logo-full-white-128.png">
@@ -73,6 +73,8 @@ limitations under the License.
 			<li id="sourcelist-append" class="navbar-if-connected"></li>
 			<li class="navbar-if-connected"><a href="#/discover"><i class="material-icons">add_circle_outline</i> More feeds</a></li>
 		</ul>
+
+
 
 		<main id="main-container">
 			<!-- =========================================== -->
@@ -147,10 +149,7 @@ limitations under the License.
 
 				<div class="content" style="display: none">
 
-					<h1>
-						<a class="add-button btn-floating waves-effect waves-light informo-bg-green" title="Add this source"><i class="material-icons">add</i></a>
-						<a class="remove-button btn-floating waves-effect waves-light informo-bg-green" title="Remove this source"><i class="material-icons">remove</i></a>
-						<span class="name"></span>
+					<h1 class="name">
 					</h1>
 
 					<h3>Who are they?</h3>

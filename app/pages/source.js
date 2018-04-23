@@ -25,7 +25,6 @@ import * as sidebar from "./sidebar";
 import $ from "jquery";
 
 let reader = null;
-let setup = false;
 let sourceClassName = null;
 
 export function init(){
@@ -58,10 +57,6 @@ export function init(){
 				$("#page-source .name").text(source.name);
 				$("#page-source .description").text("This source use the following public key: " + source.publicKey);
 
-				const isSourceAdded = storage.userSources.indexOf(sourceClassName) >= 0;
-				$("#page-source .add-button").toggle(isSourceAdded === false);
-				$("#page-source .remove-button").toggle(isSourceAdded === true);
-
 				// Display news for this source
 				reader.setFeed([sourceClassName]);
 			}
@@ -70,31 +65,6 @@ export function init(){
 			$("#page-source .content").show();
 
 		});
-
-	if(setup === false){
-		// Set button callbacks
-		$("#page-source .add-button").bind("click", ()=>{
-			const sourceIndex = storage.userSources.indexOf(sourceClassName);
-			if(sourceIndex < 0){
-				storage.userSources.push(sourceClassName);
-				storage.save();
-				_updateAddRmButtons();
-				sidebar.updateUserSourceList();
-			}
-		});
-		$("#page-source .remove-button").bind("click", ()=>{
-			const sourceIndex = storage.userSources.indexOf(sourceClassName);
-			if(sourceIndex >= 0){
-				storage.userSources.splice(sourceIndex, 1);
-				storage.save();
-				_updateAddRmButtons();
-				sidebar.updateUserSourceList();
-			}
-		});
-
-		setup = true;
-	}
-
 
 }
 
