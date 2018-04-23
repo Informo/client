@@ -17,11 +17,9 @@
 
 import Router from "../router";
 import Sources from "../sources";
-import storage from "../storage";
+import {newsEventPrefix} from "../const";
 import * as matrix from "../matrix";
-import {eventPrefix} from "../const";
 import {Reader} from "./fragments/reader";
-import * as sidebar from "./sidebar";
 import $ from "jquery";
 
 let reader = null;
@@ -39,7 +37,8 @@ export function init(){
 	$("#page-source .content").hide();
 	$("#page-source .content-loader .loader-text").text("Waiting connection to Informo...");
 
-	sourceClassName = eventPrefix + Router.getPathParamValue("sourceName");
+	let sourceName = Router.getPathParamValue("sourceName");
+	sourceClassName = newsEventPrefix + sourceName;
 
 	matrix.getConnectedMatrixClient()
 		.then(() => {
@@ -70,11 +69,4 @@ export function init(){
 
 export function remove(){
 	reader.deactivate();
-}
-
-
-function _updateAddRmButtons(){
-	const isSourceAdded = storage.userSources.indexOf(sourceClassName) >= 0;
-	$("#page-source .add-button").toggle(isSourceAdded === false);
-	$("#page-source .remove-button").toggle(isSourceAdded === true);
 }

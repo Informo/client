@@ -13,4 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const eventPrefix = "network.informo.news.";
+export const newsEventPrefix = "network.informo.news.";
+
+export function stripNewsEventPrefix(newsEventClassName){
+	console.assert(newsEventClassName.startsWith(newsEventPrefix));
+	return newsEventClassName.substr(newsEventPrefix.length);
+}

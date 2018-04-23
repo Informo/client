@@ -139,7 +139,7 @@ class Router {
 		let i = 0;
 		for(let name of routePath) {
 			if(name === (":"+paramName)){
-				return currentPath[i];
+				return decodeURI(currentPath[i]);
 			}
 			i++;
 		}

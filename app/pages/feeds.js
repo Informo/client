@@ -17,12 +17,6 @@
 
 import $ from "jquery";
 import storage from "../storage";
-import * as matrix from "../matrix";
-import Materialize from "materialize-css";
-import informoSources from "../sources";
-import {eventPrefix} from "../const";
-import Router from "../router";
-import * as sidebarPage from "./sidebar";
 
 import {Reader} from "./fragments/reader";
 
@@ -38,7 +32,7 @@ export function init(){
 		reader = new Reader($("#page-feeds .reader"), true);//TODO: make large reader
 	}
 
-	reader.setFeed(storage.userSources);
+	reader.setFeedNames(storage.userSources);
 
 }
 

@@ -20,6 +20,7 @@
 import $ from "jquery";
 import informoSources from "../../sources";
 import * as matrix from "../../matrix";
+import {newsEventPrefix} from "../../const";
 
 
 
@@ -146,10 +147,21 @@ export class Reader {
 		}
 	}
 
+	setFeedNames(sourceNames){
+		let sourceClassNames = [];
+		for(let sourceName of sourceNames){
+			sourceClassNames.push(newsEventPrefix + sourceName);
+		}
+		this.setFeed(sourceClassNames);
+	}
+
 	/// Make the reader fetch news from multiple feeds
 	/// sourceClassNames: array of SourceClassName
 	setFeed(sourceClassNames){
+		console.log("SetFeed ", sourceClassNames);
 		console.assert(sourceClassNames.constructor === Array);
+		for(let sourceClassName of sourceClassNames)
+			console.assert(sourceClassName.startsWith(newsEventPrefix), "wrong class prefix for "+sourceClassName);
 
 		if(this.loaded === true)
 			this.reset();

@@ -18,7 +18,7 @@
 import $ from "jquery";
 import informoSources from "../sources";
 import storage from "../storage";
-import {eventPrefix} from "../const";
+import {newsEventPrefix, stripNewsEventPrefix} from "../const";
 import * as matrix from "../matrix";
 import * as sidebar from "./sidebar";
 
@@ -55,39 +55,45 @@ export function init(){
 
 	matrix.getConnectedMatrixClient()
 		.then(() => {
-			for(let sourceClassName in informoSources.sources){
-				const source = informoSources.sources[sourceClassName];
 
-				let card = tempateCard.clone();
+			for(let sourceEventClassName in informoSources.sources){
+				if(sourceEventClassName.startsWith(newsEventPrefix)){
+					const source = informoSources.sources[sourceEventClassName];
+					const sourceName = stripNewsEventPrefix(sourceEventClassName);
 
-				card.find(".source-image").attr("src", "static/img/logo-full-128.png?TODO=use the source logo instead");
-				card.find(".source-name").text(source.name);
-				card.find(".source-short-description").text("TODO: source short description");
-				card.find(".source-link-website").attr("href", "TODO: Source official website link");
-				card.find(".source-country").text("TODO: country");
-				card.find(".source-language").text("TODO: language");
+					let card = tempateCard.clone();
 
-				const sourceIndex = storage.userSources.indexOf(sourceClassName);
+					card.find(".source-image").attr("src", "static/img/logo-full-128.png?TODO=use the source logo instead");
+					card.find(".source-name").text(source.name);
+					card.find(".source-short-description").text("TODO: source short description");
+					card.find(".source-link-website").attr("href", "TODO: Source official website link");
+					card.find(".source-country").text("TODO: country");
+					card.find(".source-language").text("TODO: language");
 
-				const addButton = card.find(".add-button");
-				addButton.toggleClass("disabled", sourceIndex >= 0);
+					const sourceIndex = storage.userSources.indexOf(sourceEventClassName);
 
-				addButton.bind("click", () => {
-					const sourceIndex = storage.userSources.indexOf(sourceClassName);
-					if(sourceIndex < 0){
-						storage.userSources.push(sourceClassName);
-						storage.save();
-						sidebar.updateUserSourceList();
+					const addButton = card.find(".add-button");
+					addButton.toggleClass("disabled", sourceIndex >= 0);
 
-						addButton.addClass("disabled");
-					}
-				});
+					addButton.bind("click", () => {
+						const sourceIndex = storage.userSources.indexOf(sourceEventClassName);
+						if(sourceIndex < 0){
+							storage.userSources.push(sourceName);
+							storage.save();
+							sidebar.updateUserSourceList();
 
-				let evName = sourceClassName.substr(eventPrefix.length);
-				card.find(".view-button").attr("href", "#/source/"+evName);
+							addButton.addClass("disabled");
+						}
+					});
+
+					card.find(".view-button").attr("href", "#/source/"+encodeURI(sourceName));
 
 
-				container.append(card);
+					container.append(card);
+				}
+				else{
+					console.warn("User sources contains '" + sourceEventClassName + "' that does not match '"+newsEventPrefix+".*' format");
+				}
 			}
 		});
 

@@ -20,7 +20,7 @@ import $ from "jquery";
 import storage from "../storage";
 import * as matrix from "../matrix";
 import informoSources from "../sources";
-import {eventPrefix} from "../const";
+import {newsEventPrefix} from "../const";
 
 
 const sourceButton = $(`
@@ -89,20 +89,19 @@ export function updateUserSourceList(){
 
 		let i = 0;
 
-		for(let className of storage.userSources){
+		for(let sourceName of storage.userSources){
+			let source = informoSources.sources[newsEventPrefix + sourceName];
 
-			if(className.startsWith(eventPrefix)){
-				let evName = className.substr(eventPrefix.length);
-
+			if(source){
 				let li = sourceButton.clone();
 
-				li.find("a.source-link").attr("href", "#/source/" + encodeURI(evName));//TODO: should open the feed page filtered with this source
-				li.find("a.source-page-link").attr("href", "#/source/" + encodeURI(evName));
-				li.find(".source-name").text(informoSources.sources[className].name);
+				li.find("a.source-link").attr("href", "#/source/" + encodeURI(sourceName));//TODO: should open the feed page filtered with this source
+				li.find("a.source-page-link").attr("href", "#/source/" + encodeURI(sourceName));
+				li.find(".source-name").text(source.name);
 
 				li.find(".badge")
-					.text(informoSources.sources[className].unread)
-					.addClass(informoSources.sources[className].unread === 0 ? "hide" : null);
+					.text(source.unread)
+					.addClass(source.unread === 0 ? "hide" : null);
 
 
 				li.find(".dropdown-content").attr("id", "sidebar-dropdown-"+i);
@@ -124,18 +123,18 @@ export function updateUserSourceList(){
 				});
 
 				li.find(".source-remove").bind("click", () => {
-					const sourceIndex = storage.userSources.indexOf(className);
+					const sourceIndex = storage.userSources.indexOf(sourceName);
 					if(sourceIndex >= 0){
 						storage.userSources.splice(sourceIndex, 1);
 						storage.save();
 						updateUserSourceList();
 					}
 				});
-
 			}
 			else{
-				console.warn("network.informo.sources contains '" + className + "' that does not match 'network.informo.news.*' format");
+				console.warn("USER DEFINED SOURCES NOT SUPPORTED");//TODO
 			}
+
 		}
 
 		lastSourceList = informoSources.sources;
