@@ -16,7 +16,6 @@
 import storage from "./storage";
 import informoSources from "./sources";
 import MatrixClient from "./matrix/client";
-import {eventPrefix} from "./const";
 import $ from "jquery";
 import Materialize from "materialize-css";
 
