@@ -70,7 +70,7 @@ export function init(){
 					card.find(".source-country").text("TODO: country");
 					card.find(".source-language").text("TODO: language");
 
-					const sourceIndex = storage.userSources.indexOf(sourceEventClassName);
+					const sourceIndex = storage.userSources.indexOf(sourceName);
 
 					const addButton = card.find(".add-button");
 					addButton.toggleClass("disabled", sourceIndex >= 0);
