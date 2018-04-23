@@ -15,14 +15,13 @@
 
 class Storage {
 	constructor(){
-		this.homeserverURL    = window.localStorage.getItem("homeserverURL");
-		this.accessToken      = window.localStorage.getItem("accessToken");
-		this.userID           = window.localStorage.getItem("userID");
-		this.deviceID         = window.localStorage.getItem("deviceID");
-		this.roomAlias        = window.localStorage.getItem("roomAlias");
-		this.roomID           = window.localStorage.getItem("roomID");
-		this.userSources      = JSON.parse(window.localStorage.getItem("userSources"));
-		if(this.userSources === null) this.userSources = [];
+		this.homeserverURL    = this._getLocalStorage("homeserverURL");
+		this.accessToken      = this._getLocalStorage("accessToken");
+		this.userID           = this._getLocalStorage("userID");
+		this.deviceID         = this._getLocalStorage("deviceID");
+		this.roomAlias        = this._getLocalStorage("roomAlias");
+		this.roomID           = this._getLocalStorage("roomID");
+		this.userSources      = JSON.parse(this._getLocalStorage("userSources", "[]"));
 	}
 
 	save(){
@@ -33,6 +32,14 @@ class Storage {
 		window.localStorage.setItem("roomAlias", this.roomAlias);
 		window.localStorage.setItem("roomID", this.roomID);
 		window.localStorage.setItem("userSources", JSON.stringify(this.userSources));
+	}
+
+	_getLocalStorage(name, defaultValue = null){
+		const value = window.localStorage.getItem(name);
+		if(value === null || value === "null"){
+			return defaultValue;
+		}
+		return value;
 	}
 }
 
