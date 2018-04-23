@@ -135,6 +135,7 @@ export class Reader {
 		this.isLoadingBottom = false;
 		this.noMorePosts = false;
 		this.sourceClassNames = null;
+		this.showUnreadOnly = false;
 
 		this.body.find(">.request-loader").show();
 		this.body.find(">:not(.request-loader)").hide();
@@ -145,6 +146,11 @@ export class Reader {
 		if(this.scrollListener !== null){
 			$(window).unbind("scroll.readerBottomLoad");
 		}
+	}
+
+	/// If called, this reader will only show unread feeds. Call this.reset() to undo.
+	setOnlyUnread(){
+		this.showUnreadOnly = true;
 	}
 
 	setFeedNames(sourceNames){
@@ -158,7 +164,6 @@ export class Reader {
 	/// Make the reader fetch news from multiple feeds
 	/// sourceClassNames: array of SourceClassName
 	setFeed(sourceClassNames){
-		console.log("SetFeed ", sourceClassNames);
 		console.assert(sourceClassNames.constructor === Array);
 		for(let sourceClassName of sourceClassNames)
 			console.assert(sourceClassName.startsWith(newsEventPrefix), "wrong class prefix for "+sourceClassName);
@@ -212,6 +217,7 @@ export class Reader {
 				news.sort((a, b) => b.content.date - a.content.date);
 
 				for(let article of news) {
+					//TODO: handle unread
 					if (informoSources.canPublish(article.sender, article.type)) {
 						let content = article.content;
 						this._addArticle(

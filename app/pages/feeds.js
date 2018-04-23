@@ -17,8 +17,11 @@
 
 import $ from "jquery";
 import storage from "../storage";
+import router from "../router";
 
 import {Reader} from "./fragments/reader";
+import informoSources from "../sources";
+import {newsEventPrefix} from "../const";
 
 
 
@@ -26,13 +29,43 @@ import {Reader} from "./fragments/reader";
 let reader = null;
 
 
-export function init(){
+export function init(title, type){
+	// TODO: we'll need later a better handling of unread / all selection
 
 	if(reader === null){
 		reader = new Reader($("#page-feeds .reader"), true);//TODO: make large reader
 	}
 
-	reader.setFeedNames(storage.userSources);
+
+	let sources = [];
+
+	switch(type){
+	case "all":
+		sources = storage.userSources;
+		break;
+	case "unread":
+		reader.setOnlyUnread();
+		sources = storage.userSources;
+		break;
+	case "source":{
+		const sourceName = router.getPathParamValue("sourceName");
+		if(title === null){
+			//TODO: will display sourceName if informo not yet connected
+			const source = informoSources.sources[newsEventPrefix + sourceName];
+			if(source)
+				title = "Articles from " + source.name;
+			else
+				title = "Articles from " + sourceName;
+		}
+		sources = [sourceName];
+		break;
+	}
+	default:
+		console.assert("Unknown feeds type:", type);
+	}
+
+	$("#page-feeds .title").text(title);
+	reader.setFeedNames(sources);
 
 }
 

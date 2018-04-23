@@ -31,8 +31,9 @@ const sourceButton = $(`
 		</a>
 		<a class="dropdown-button" href="#" data-activates=""><i class="icon-more material-icons">more_horiz</i></a>
 
-		<ul id='dropdown1' class='dropdown-content'>
+		<ul id="" class="dropdown-content">
 			<li><a class="source-page-link"><i class="material-icons">pageview</i>View source page</a></li>
+			<li><a class="source-markasread"><i class="material-icons">done_all</i>Mark as read</a></li>
 			<li><a class="source-remove"><i class="material-icons">remove</i>Remove source</a></li>
 		</ul>
 
@@ -95,7 +96,7 @@ export function updateUserSourceList(){
 			if(source){
 				let li = sourceButton.clone();
 
-				li.find("a.source-link").attr("href", "#/source/" + encodeURI(sourceName));//TODO: should open the feed page filtered with this source
+				li.find("a.source-link").attr("href", "#/feeds/source/" + encodeURI(sourceName));
 				li.find("a.source-page-link").attr("href", "#/source/" + encodeURI(sourceName));
 				li.find(".source-name").text(source.name);
 

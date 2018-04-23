@@ -30,9 +30,21 @@ const routes = [
 		onRemoved: null,
 	},
 	{
-		path: "/feeds",
+		path: "/feeds/all",
 		elmt: "#page-feeds",
-		onInit: feedsPage.init,
+		onInit: () => { feedsPage.init("All your feeds", "all"); },
+		onRemoved: null,
+	},
+	{
+		path: "/feeds/unread",
+		elmt: "#page-feeds",
+		onInit: () => { feedsPage.init("Unread articles", "unread"); },
+		onRemoved: null,
+	},
+	{
+		path: "/feeds/source/:sourceName",
+		elmt: "#page-feeds",
+		onInit: () => { feedsPage.init(null, "source"); },
 		onRemoved: null,
 	},
 	{
@@ -54,6 +66,7 @@ const route404 = {
 	path: "/404",
 	elmt: "#page-404",
 	onInit: function(){},
+	onRemoved: null,
 };
 
 class Router {
@@ -93,20 +106,19 @@ class Router {
 	navigate(path){
 		// TODO: do not refresh if path is the same but anchor is changed
 		if(path === this.currentVirtualUrl().pathname){
-			console.debug("Router: refresh ", path);
 			this.updateView();
 		}
 		else{
-			console.debug("Router: move to ", path);
 			window.location.hash = "#" + path;
 		}
 	}
 
 	/// Update the displayed page to match the current virtual path
 	updateView(){
-		let currentVirtUrl = this.currentVirtualUrl();
+		const currentVirtUrl = this.currentVirtualUrl();
 		if(!currentVirtUrl || currentVirtUrl.pathname == "" || currentVirtUrl.pathname == "/"){
-			this.navigate("/feeds");
+			// Landing page
+			this.navigate("/feeds/all");
 			return;
 		}
 

@@ -66,6 +66,10 @@ nav {
 					margin: 0 $sidenav-padding/2 0 0;
 				}
 			}
+
+			.source-remove:hover{
+				background-color: #fcc;
+			}
 		}
 	}
 	.icon-more {
