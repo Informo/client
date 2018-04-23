@@ -151,6 +151,9 @@ class Router {
 		const pathSplit = path.split("/").filter((a) => a != "");
 		const pathModelSplit = pathModel.split("/").filter((a) => a != "");
 
+		if(pathSplit.length != pathModelSplit.length)
+			return false;
+
 		for(let [i, name] of pathSplit.entries()) {
 			if(pathModelSplit[i][0] === ":")
 				continue;
