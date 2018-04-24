@@ -30,23 +30,23 @@ const template = [
 		body: $(`
 			<div class="reader-fragment">
 				<div class="reader-pane-list">
-
-					<ul class="collection with-header">
-						<div class="reader-request-loader center-align">
-							<div class="preloader-wrapper active">
-								<div class="spinner-layer spinner-green-only">
-									<div class="circle-clipper left">
-										<div class="circle"></div>
-									</div><div class="gap-patch">
-										<div class="circle"></div>
-									</div><div class="circle-clipper right">
-										<div class="circle"></div>
-									</div>
+					<div class="reader-request-loader center-align">
+						<div class="preloader-wrapper active">
+							<div class="spinner-layer spinner-green-only">
+								<div class="circle-clipper left">
+									<div class="circle"></div>
+								</div><div class="gap-patch">
+									<div class="circle"></div>
+								</div><div class="circle-clipper right">
+									<div class="circle"></div>
 								</div>
 							</div>
 						</div>
+					</div>
+					<ul class="collection with-header">
+
 						<div class="article-list"></div>
-						<li class="reader-bottom-loader reader-loaded-content collection-item center-align">
+						<li class="reader-bottom-loader reader-loaded-content center-align">
 							<div class="preloader-wrapper active">
 								<div class="spinner-layer spinner-green-only">
 									<div class="circle-clipper left">
@@ -63,42 +63,56 @@ const template = [
 				</div>
 
 				<div class="reader-pane-article z-depth-1">
-					<div class="container">
-						<div class="reader-request-loader center-align">
-							<div class="preloader-wrapper active">
-								<div class="spinner-layer spinner-green-only">
-									<div class="circle-clipper left">
-										<div class="circle"></div>
-									</div><div class="gap-patch">
-										<div class="circle"></div>
-									</div><div class="circle-clipper right">
-										<div class="circle"></div>
-									</div>
+					<div class="reader-request-loader center-align">
+						<div class="preloader-wrapper active">
+							<div class="spinner-layer spinner-green-only">
+								<div class="circle-clipper left">
+									<div class="circle"></div>
+								</div><div class="gap-patch">
+									<div class="circle"></div>
+								</div><div class="circle-clipper right">
+									<div class="circle"></div>
 								</div>
 							</div>
-							<div class="reader-request-loader-text flow-text"></div>
 						</div>
-						<div class="reader-article reader-loaded-content">
-							<h3></h3>
-							<p>
+						<div class="reader-request-loader-text flow-text"></div>
+					</div>
+					<div class="reader-article reader-loaded-content">
+						<div class="article-title-bar z-depth-1">
+							<div class="container">
+								<h3 class="informo-article-title flow-text">{{TITLE}}</h3>
+								<div class="informo-article-publication">
+									<span class="informo-article-author">{{AUTHOR}}</span>
+									<span class="informo-article-source">{{SOURCE}}</span>
+									-
+									<span class="informo-article-date">{{DATE}}</span>
+								</div>
+
+								<div class="informo-article-details">
+									<a class="informo-article-anchor" href="{{LINK}}"><i class="material-icons">link</i> Informo article link</a>
+									<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)"><i class="material-icons">open_in_new</i> Original article</a>
+								</div>
+							</div>
+						</div>
+						<div class="container">
+							<p class="informo-article-intro">
+								{{DESCRIPTION}}
 							</p>
+							<p class="informo-article-content">
 						</div>
 					</div>
 				</div>
 			</div>
 		`),
 		article: $(`
-			<a class="informo-article collection-item" href="#">
+			<a class="informo-article collection-item informo-article-anchor" href="#">
 				<i class="material-icons">label_outline</i>
-				<span class="informo-article-title title flow-text">Praise Raptor Jesus and the FSM will grant you eternal life</span>
-				<div class="informo-article-intro truncate">
-					Every day, you need to address a prayer<br>
-					Because yolo
-				</div>
+				<span class="informo-article-title title flow-text"></span>
+				<div class="informo-article-intro truncate"></div>
 				<div>
-					<span class="informo-article-author">PirateCaptain</span>
-					<span class="informo-article-source">Real church</span>
-					<span class="right informo-article-date">01/02/2018</span>
+					<span class="informo-article-author"></span>
+					<span class="informo-article-source"></span>
+					<span class="right informo-article-date"></span>
 				</div>
 			</a>
 		`),
@@ -141,7 +155,7 @@ const template = [
 		article: $(`
 			<li class="informo-article">
 				<div class="collapsible-header hoverable">
-					<div>
+					<div class="article-header-text">
 						<div class="flow-text"><span class="informo-article-title">{{TITLE}}</span></div>
 						<div class="informo-article-publication">
 							<span class="informo-article-author">{{AUTHOR}}</span>
@@ -153,8 +167,8 @@ const template = [
 							{{DESCRIPTION}}
 						</div>
 					</div>
-					<div class="informo-article-image hide-on-small-only valign-wrapper">
-						<img src="">
+					<div class="article-header-image hide-on-small-only valign-wrapper">
+						<img class="informo-article-image"/>
 					</div>
 
 				</div>
@@ -213,6 +227,7 @@ export class Reader {
 		this.noMorePosts = false;
 		this.sourceClassNames = null;
 		this.showUnreadOnly = false;
+		this.currentArticle = null;
 
 		this.body.find(".reader-request-loader").show();
 		this.body.find(".reader-loaded-content").hide();
@@ -257,12 +272,14 @@ export class Reader {
 
 
 				// Bind bottom scroll
+				const scrollPane = this.compact === true ? $(window) : this.body.find(".reader-pane-list");
 				if(this.scrollListener !== null){
-					$(window).unbind("scroll.readerBottomLoad"+this.id.toString);
+					scrollPane.unbind("scroll.readerBottomLoad"+this.id.toString);
 				}
-				$(window).bind("scroll.readerBottomLoad"+this.id.toString, () => {
+				scrollPane.bind("scroll.readerBottomLoad"+this.id.toString, () => {
 					let loaderPos = this.body.find(".reader-bottom-loader").position().top;
 
+					// TODO: make this work for scrollPane for large reader
 					if (this.loaded === true && window.scrollY + window.innerHeight >= loaderPos && this.isLoadingBottom === false && this.noMorePosts === false) {
 						this.isLoadingBottom = true;
 						this._appendFeedArticles(false)
@@ -293,17 +310,17 @@ export class Reader {
 				}
 
 				news.sort((a, b) => b.content.date - a.content.date);
-
-				for(let article of news) {
+				for(let articleMxEvent of news) {
 					//TODO: handle unread
-					if (informoSources.canPublish(article.sender, article.type)) {
-						let content = article.content;
+					if (informoSources.canPublish(articleMxEvent.sender, articleMxEvent.type)) {
+						let content = articleMxEvent.content;
 						this._addArticle(
+							articleMxEvent.event_id,
 							content.headline,
 							content.description,
 							content.author,
 							content.thumbnail,
-							informoSources.sources[article.type].name,
+							informoSources.sources[articleMxEvent.type].name,
 							content.date,
 							content.content,
 							content.link
@@ -326,49 +343,63 @@ export class Reader {
 	/// ts: timestamp the article has been posted
 	/// content: HTML content
 	/// href: original article link (on the news site)
-	_addArticle(title, description, author, image, source, ts, content, href){
+	_addArticle(articleID, title, description, author, image, source, ts, content, href){
 		let article = template[this.compact === true ? 1 : 0].article.clone();
 
-		if(image && image !== null){
-			article.addClass("with-img");
-			article.find(".informo-article-image img").attr("src", image);
+		function getTimeAgoString(dateDiff){
+			const seconds = dateDiff / 1000;
+			var interval = Math.floor(seconds / 31536000);
+			if (interval > 1)
+				return interval + " years";
+			interval = Math.floor(seconds / 2592000);
+			if (interval > 1)
+				return interval + " months";
+			interval = Math.floor(seconds / 86400);
+			if (interval > 1)
+				return interval + " days";
+			interval = Math.floor(seconds / 3600);
+			if (interval > 1)
+				return interval + " hours";
+			interval = Math.floor(seconds / 60);
+			if (interval > 1)
+				return interval + " minutes";
+			return Math.floor(seconds) + " seconds";
 		}
-		else{
-			article.find(".informo-article-image").remove();
-		}
-
-		// Author
-		if (author) {
-			article.find(".informo-article-author").html("by <em></em> for");
-			article.find(".informo-article-author > em").text(author);
-		} else {
-			article.find(".informo-article-author").remove();
-		}
-		// Source
-		article.find(":not(a).informo-article-source").text(source);
-		article.find("a.informo-article-source").attr("href", href);
-		// Date
-		let date = new Date(ts*1000);
-		if (date) {
-			article.find(".informo-article-date").text(`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`);
-		} else {
-			article.find(".informo-article-date").remove();
-		}
-
-		article.find(".informo-article-anchor").attr("href", "#"); //TODO add a link to this article on informo
-		article.find(".informo-article-title").text(title);
-
 		function setSanitizedHtmlContent(element, content){
 			element.html(content);
 			element.find("script").remove();
 			element.find("a").attr("onclick", "return externalLink(this)");
 		}
-		if(this.compact === true){
+
+		function setArticleContent(article){
+			// Title
+			article.find(".informo-article-title").text(title);
+			// Image
+			if(image && image !== null)
+				article.addClass("with-img");
+			article.find(".informo-article-image img, img.informo-article-image").attr("src", image);
+			// Author
+			if (author) {
+				article.find(".informo-article-author").text(author);
+			} else {
+				article.find(".informo-article-author").remove();
+			}
+			// Source
+			article.find("a.informo-article-source").attr("href", href);
+			article.find(":not(a).informo-article-source").text(source);
+			// Date
+			const date = new Date(ts*1000);
+			const dateDiff = new Date() - date;
+			article.find(".informo-article-date").text(getTimeAgoString(dateDiff) + " ago");
+
+			// Link to this article on informo
+			article.find("a.informo-article-anchor").attr("href", "#"); //TODO
+
+			// Article content
 			setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
 			setSanitizedHtmlContent(article.find(".informo-article-content"), content);
+
 		}
-		else
-			article.find(".informo-article-intro").text(description);//TODO: remove HTML element from description
 
 
 		//Unread marker
@@ -383,12 +414,30 @@ export class Reader {
 
 		}
 
-		// Article selection on large reader
+		// Set article content in the list
+		setArticleContent(article);
+
+
+		const reader = this;
+
+		// Selects the current article (only for large reader)
+		function selectArticle(articleNode){
+			// TODO: mark this.currentArticle as read if !== null
+			setArticleContent(articleNode);
+			reader.currentArticle = articleID;
+		}
+
+		// Set separated pane article content on large reader
 		if(this.compact === false){
-			const articleContent = this.body.find(".reader-article");
+			const largeArticle = this.body.find(".reader-article");
+
+			// Display at least one article
+			if(this.currentArticle === null)
+				selectArticle(largeArticle);
+
+			// Setup article display on selection
 			article.bind("click", () => {
-				articleContent.find("h3").text(title);
-				setSanitizedHtmlContent(articleContent.find("p"), content);
+				selectArticle(largeArticle);
 				return false;
 			});
 		}

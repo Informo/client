@@ -108,6 +108,21 @@ body.no-sidebar #sidebar-button {
 .reader-fragment {
 	&.compact {
 		.informo-article {
+
+			&.with-img .collapsible-header{
+				.article-header-text {
+					flex: 1;
+				}
+				.article-header-image {
+					max-width: 25%;
+					margin: -15px -15px -15px 0;
+
+					img {
+						max-height: 200px;
+						max-width: 100%;
+					}
+				}
+			}
 			.informo-article-title {
 				font-weight: bold;
 			}
@@ -133,22 +148,6 @@ body.no-sidebar #sidebar-button {
 					border-left-color: #417D44;
 				}
 			}
-
-
-			&.with-img {
-				.collapsible-header > div:first-child {
-					flex: 1;
-				}
-				.informo-article-image {
-					max-width: 25%;
-					margin: -15px -15px -15px 0;
-
-					img {
-						max-height: 200px;
-						max-width: 100%;
-					}
-				}
-			}
 		}
 	}
 
@@ -156,46 +155,81 @@ body.no-sidebar #sidebar-button {
 		display: flex;
 		justify-content: center;
 
-		.collection-item {
-			width: 100%;
-		}
 
 		.reader-pane-list {
 			flex-basis: 35%;
 			overflow-y: auto;
 			background-color: #ccc;
 
-			.article-list {
-				.flow-text{
-					font-weight: 300;
-					$i: 0;
-					@while $i <= $intervals {
-						@media only screen and (min-width : 360 + ($i * $interval-size)) {
-							font-size: 1.0rem * (1 + (.02 * $i));
+			.collection {
+				border: none;
+				margin: 0;
+				.collection-item {
+					width: 100%;
+				}
+				.article-list {
+					.flow-text{
+						font-weight: 300;
+						$i: 0;
+						@while $i <= $intervals {
+							@media only screen and (min-width : 360 + ($i * $interval-size)) {
+								font-size: 1.0rem * (1 + (.02 * $i));
+							}
+							$i: $i + 1;
 						}
-						$i: $i + 1;
+						// Handle below 360px screen
+						@media only screen and (max-width: 360px) {
+							font-size: 1.0rem;
+						}
 					}
-					// Handle below 360px screen
-					@media only screen and (max-width: 360px) {
-						font-size: 1.0rem;
-					}
-				}
 
-				> a.unread * {
-					font-weight: 400;
-				}
-				> a:not(.unread) * {
-					font-weight: 300;
+					> a.unread * {
+						font-weight: 400;
+					}
+					> a:not(.unread) * {
+						font-weight: 300;
+					}
 				}
 			}
 		}
 		.reader-pane-article {
 			flex-basis: 65%;
 			overflow-y: auto;
+
+			.article-title-bar {
+				margin-top: -5em;
+				padding-top: 5em;
+				background-color: $primary-color-light;
+
+				.informo-article-details {
+					padding: 1em;
+
+					> * {
+						padding: 0 1em;
+					}
+					i {
+						vertical-align: middle;
+					}
+				}
+			}
+			.informo-article-intro {
+				margin: 2em 0;
+			}
 		}
 	}
 
+	.informo-article-content {
+		img {
+			max-width: 100%;
+		}
+		blockquote {
+			border-left-color: #417D44;
+		}
+	}
 
+	.reader-request-loader {
+		margin: 5em;
+	}
 	.reader-bottom-loader {
 		text-align: center;
 		display: none;
