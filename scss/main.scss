@@ -8,19 +8,11 @@ $roboto-font-path: "fonts/roboto/";
 @import "~materialize-css/sass/materialize.scss";
 @import "~material-design-icons/iconfont/material-icons.css";
 
+// By default, hide all pages
 #main-container {
 	> * {
 		display: none;
 	}
-}
-
-#loader>div {
-	width: 100%;
-}
-
-#bottom-loader {
-	text-align: center;
-	display: none;
 }
 
 // Top bar
@@ -204,6 +196,12 @@ body.no-sidebar #sidebar-button {
 	}
 
 
+	.reader-bottom-loader {
+		text-align: center;
+		display: none;
+	}
+
+
 }
 
 // Discover page
@@ -220,6 +218,7 @@ body.no-sidebar #sidebar-button {
 }
 
 
+// Global classes
 
 .informo-bg-green {
 	background-color: $primary-color;
@@ -242,6 +241,7 @@ body.no-sidebar #sidebar-button {
 		}
 	}
 }
+
 .center-small {
 	max-width: 500px;
 	margin-left: auto;
@@ -249,8 +249,7 @@ body.no-sidebar #sidebar-button {
 }
 
 
-
-
+// Connection progress toast
 .connecting-toast {
 	transition-property: background-color;
 	transition-duration: 1s;

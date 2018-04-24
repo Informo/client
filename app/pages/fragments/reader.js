@@ -106,7 +106,7 @@ const template = [
 	{
 		// Compact view
 		body: $(`
-			<div style="reader-fragment compact">
+			<div class="reader-fragment compact">
 				<div class="reader-request-loader center-align">
 					<div class="preloader-wrapper active">
 						<div class="spinner-layer spinner-green-only">
