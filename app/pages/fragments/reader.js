@@ -28,22 +28,86 @@ const template = [
 	{
 		// Paned / large view
 		body: $(`
-			<div>
+			<div class="reader-fragment">
+				<div class="reader-pane-list">
 
+					<ul class="collection with-header">
+						<div class="reader-request-loader center-align">
+							<div class="preloader-wrapper active">
+								<div class="spinner-layer spinner-green-only">
+									<div class="circle-clipper left">
+										<div class="circle"></div>
+									</div><div class="gap-patch">
+										<div class="circle"></div>
+									</div><div class="circle-clipper right">
+										<div class="circle"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="article-list"></div>
+						<li class="reader-bottom-loader reader-loaded-content collection-item center-align">
+							<div class="preloader-wrapper active">
+								<div class="spinner-layer spinner-green-only">
+									<div class="circle-clipper left">
+										<div class="circle"></div>
+									</div><div class="gap-patch">
+										<div class="circle"></div>
+									</div><div class="circle-clipper right">
+										<div class="circle"></div>
+									</div>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
 
+				<div class="reader-pane-article z-depth-1">
+					<div class="container">
+						<div class="reader-request-loader center-align">
+							<div class="preloader-wrapper active">
+								<div class="spinner-layer spinner-green-only">
+									<div class="circle-clipper left">
+										<div class="circle"></div>
+									</div><div class="gap-patch">
+										<div class="circle"></div>
+									</div><div class="circle-clipper right">
+										<div class="circle"></div>
+									</div>
+								</div>
+							</div>
+							<div class="reader-request-loader-text flow-text"></div>
+						</div>
+						<div class="reader-article reader-loaded-content">
+							<h3></h3>
+							<p>
+							</p>
+						</div>
+					</div>
+				</div>
 			</div>
-
 		`),
 		article: $(`
-
-
+			<a class="informo-article collection-item" href="#">
+				<i class="material-icons">label_outline</i>
+				<span class="informo-article-title title flow-text">Praise Raptor Jesus and the FSM will grant you eternal life</span>
+				<div class="informo-article-intro truncate">
+					Every day, you need to address a prayer<br>
+					Because yolo
+				</div>
+				<div>
+					<span class="informo-article-author">PirateCaptain</span>
+					<span class="informo-article-source">Real church</span>
+					<span class="right informo-article-date">01/02/2018</span>
+				</div>
+			</a>
 		`),
 	},
 	{
 		// Compact view
 		body: $(`
-			<div>
-				<div class="request-loader center-align">
+			<div style="reader-fragment compact">
+				<div class="reader-request-loader center-align">
 					<div class="preloader-wrapper active">
 						<div class="spinner-layer spinner-green-only">
 							<div class="circle-clipper left">
@@ -55,12 +119,12 @@ const template = [
 							</div>
 						</div>
 					</div>
-					<div class="request-loader-text flow-text"></div>
+					<div class="reader-request-loader-text flow-text"></div>
 				</div>
 
-				<ul class="article-list collapsible popout" data-collapsible="accordion"></ul>
+				<ul class="article-list reader-loaded-content collapsible popout" data-collapsible="accordion"></ul>
 
-				<div class="bottom-loader center-align">
+				<div class="reader-bottom-loader reader-loaded-content center-align">
 					<div class="preloader-wrapper active">
 						<div class="spinner-layer spinner-green-only">
 							<div class="circle-clipper left">
@@ -127,7 +191,20 @@ export class Reader {
 		this.reset();
 
 		container.append(this.body);
-		this.body.find(".article-list").collapsible();
+
+		if(this.compact === true){
+			this.body.find(".article-list").collapsible();
+		}
+		else{
+			// TODO: handle unbind
+			const body = this.body;
+			$(window).bind("resize", function(){
+				body.height($(window).height() - body.position().top);
+			});
+			this.body.height($(window).height() - this.body.position().top);
+
+
+		}
 	}
 	/// Remove all feeds
 	reset(){
@@ -137,9 +214,9 @@ export class Reader {
 		this.sourceClassNames = null;
 		this.showUnreadOnly = false;
 
-		this.body.find(">.request-loader").show();
-		this.body.find(">:not(.request-loader)").hide();
-		this.body.find(".article-list").empty();
+		this.body.find(".reader-request-loader").show();
+		this.body.find(".reader-loaded-content").hide();
+		this.body.find(".article-list .informo-article").remove();
 	}
 
 	deactivate(){
@@ -175,15 +252,16 @@ export class Reader {
 
 		this._appendFeedArticles(true, true)
 			.then(() => {
-				this.body.find(">.request-loader").hide();
-				this.body.find(">:not(.request-loader)").show();
+				this.body.find(".reader-request-loader").hide();
+				this.body.find(".reader-loaded-content").show();
+
 
 				// Bind bottom scroll
 				if(this.scrollListener !== null){
 					$(window).unbind("scroll.readerBottomLoad"+this.id.toString);
 				}
 				$(window).bind("scroll.readerBottomLoad"+this.id.toString, () => {
-					let loaderPos = this.body.find(".bottom-loader").position().top;
+					let loaderPos = this.body.find(".reader-bottom-loader").position().top;
 
 					if (this.loaded === true && window.scrollY + window.innerHeight >= loaderPos && this.isLoadingBottom === false && this.noMorePosts === false) {
 						this.isLoadingBottom = true;
@@ -198,19 +276,19 @@ export class Reader {
 
 	_appendFeedArticles(resetPos, reportProgress = false) {
 		if(reportProgress === true)
-			this.body.find(".request-loader .request-loader-text").text("Waiting connection to Informo...");
+			this.body.find(".reader-request-loader .reader-request-loader-text").text("Waiting connection to Informo...");
 
 		return matrix.getConnectedMatrixClient()
 			.then(() => {
 				if(reportProgress === true)
-					this.body.find(".request-loader .request-loader-text").text("Fetching news...");
+					this.body.find(".reader-request-loader .reader-request-loader-text").text("Fetching news...");
 
 				return matrix.getNews(this.sourceClassNames, resetPos);
 			})
 			.then((news) => {
 				if (!(news && news.length)) {
 					this.noMorePosts = true;
-					this.body.find(".bottom-loader").hide();
+					this.body.find(".reader-bottom-loader").hide();
 					return;
 				}
 
@@ -234,7 +312,7 @@ export class Reader {
 				}
 
 				this.loaded = true;
-				this.body.find(".bottom-loader").show();
+				this.body.find(".reader-bottom-loader").show();
 			});
 	}
 
@@ -267,8 +345,8 @@ export class Reader {
 			article.find(".informo-article-author").remove();
 		}
 		// Source
-		article.find(":not(a).informo-article-source")
-			.text(source);
+		article.find(":not(a).informo-article-source").text(source);
+		article.find("a.informo-article-source").attr("href", href);
 		// Date
 		let date = new Date(ts*1000);
 		if (date) {
@@ -279,15 +357,41 @@ export class Reader {
 
 		article.find(".informo-article-anchor").attr("href", "#"); //TODO add a link to this article on informo
 		article.find(".informo-article-title").text(title);
-		article.find("a.informo-article-source").attr("href", href);
 
 		function setSanitizedHtmlContent(element, content){
 			element.html(content);
 			element.find("script").remove();
 			element.find("a").attr("onclick", "return externalLink(this)");
 		}
-		setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
-		setSanitizedHtmlContent(article.find(".informo-article-content"), content);
+		if(this.compact === true){
+			setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
+			setSanitizedHtmlContent(article.find(".informo-article-content"), content);
+		}
+		else
+			article.find(".informo-article-intro").text(description);//TODO: remove HTML element from description
+
+
+		//Unread marker
+		if(this.compact === true){
+			// TODO
+		}
+		else{
+			const isUnread = Math.floor(Math.random() * 2) == 0;//TODO
+			article.find(">i").text(isUnread ? "label" : "label_outline");
+			if(isUnread === true)
+				article.addClass("unread");
+
+		}
+
+		// Article selection on large reader
+		if(this.compact === false){
+			const articleContent = this.body.find(".reader-article");
+			article.bind("click", () => {
+				articleContent.find("h3").text(title);
+				setSanitizedHtmlContent(articleContent.find("p"), content);
+				return false;
+			});
+		}
 
 		this.body.find(".article-list").append(article);
 	}

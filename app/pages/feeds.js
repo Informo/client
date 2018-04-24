@@ -33,7 +33,7 @@ export function init(title, type){
 	// TODO: we'll need later a better handling of unread / all selection
 
 	if(reader === null){
-		reader = new Reader($("#page-feeds .reader"), true);//TODO: make large reader
+		reader = new Reader($("#page-feeds .reader"), false);
 	}
 
 
@@ -64,7 +64,7 @@ export function init(title, type){
 		console.assert("Unknown feeds type:", type);
 	}
 
-	$("#page-feeds .title").text(title);
+	$("#page-feeds .page-title").text(title);
 	reader.setFeedNames(sources);
 
 }
