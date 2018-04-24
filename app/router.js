@@ -96,7 +96,9 @@ class Router {
 
 	/// Returns an URL object that combine the hash location with the current URI
 	currentVirtualUrl(){
-		return new URL(window.location.origin + window.location.hash.substr(1));
+		let url = window.location.origin === "null" ? "file://" : window.location.origin;
+		url += window.location.hash.substr(1);
+		return new URL(url);
 	}
 
 	/// Navigate to a given virtual path.
