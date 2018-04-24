@@ -46,6 +46,7 @@ export function init(){
 
 
 	let homeserverList = $("#connect-homeserver-list");
+	homeserverList.empty();
 	for(let homeserver of homeservers){
 
 		let tr = $(`
