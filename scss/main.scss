@@ -1,8 +1,11 @@
 
 $primary-color: #417D44;
 $primary-color-light: #CAF0CC;
-$primary-color-dark: darken($primary-color, 30%);
+$primary-color-dark: darken($primary-color, 15%);
+$secondary-color: darken($primary-color, 5%);
+$link-color: #1a93b3;
 
+$collection-active-color: lighten($primary-color, 60%) !default;
 
 $roboto-font-path: "fonts/roboto/";
 @import "~materialize-css/sass/materialize.scss";
@@ -173,14 +176,18 @@ body.no-sidebar #sidebar-button {
 						$i: 0;
 						@while $i <= $intervals {
 							@media only screen and (min-width : 360 + ($i * $interval-size)) {
-								font-size: 1.0rem * (1 + (.02 * $i));
+								font-size: 0.9rem * (1 + (.02 * $i));
 							}
 							$i: $i + 1;
 						}
 						// Handle below 360px screen
 						@media only screen and (max-width: 360px) {
-							font-size: 1.0rem;
+							font-size: 0.9rem;
 						}
+					}
+
+					i {
+						vertical-align: text-bottom;
 					}
 
 					> a.unread * {

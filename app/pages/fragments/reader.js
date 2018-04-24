@@ -227,7 +227,10 @@ export class Reader {
 		this.noMorePosts = false;
 		this.sourceClassNames = null;
 		this.showUnreadOnly = false;
-		this.currentArticle = null;
+
+		// Only used for large view
+		this.currentArticleEventID = null;
+		this.currentArticleNode = null;
 
 		this.body.find(".reader-request-loader").show();
 		this.body.find(".reader-loaded-content").hide();
@@ -421,10 +424,17 @@ export class Reader {
 		const reader = this;
 
 		// Selects the current article (only for large reader)
-		function selectArticle(articleNode){
-			// TODO: mark this.currentArticle as read if !== null
-			setArticleContent(articleNode);
-			reader.currentArticle = articleID;
+		function selectArticle(targetContent){
+			if(reader.currentArticleEventID !== null){
+				// TODO: mark this.currentArticleEventID as read if !== null
+				reader.currentArticleNode.removeClass("active");
+			}
+
+			article.addClass("active");
+			setArticleContent(targetContent);
+
+			reader.currentArticleEventID = articleID;
+			reader.currentArticleNode = article;
 		}
 
 		// Set separated pane article content on large reader
@@ -432,7 +442,7 @@ export class Reader {
 			const largeArticle = this.body.find(".reader-article");
 
 			// Display at least one article
-			if(this.currentArticle === null)
+			if(this.currentArticleEventID === null)
 				selectArticle(largeArticle);
 
 			// Setup article display on selection
