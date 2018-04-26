@@ -249,14 +249,12 @@ export class Reader {
 			this.body.height($(window).height() - this.body.position().top);
 
 			this.body.find(".previous-article").bind("click", () => {
-				console.log("Click");
 				if(this.currentArticleIndex !== null){
 					this._selectArticle(this.currentArticleIndex - 1);
 				}
 				return false;
 			});
 			this.body.find(".next-article").bind("click", () => {
-				console.log("Click");
 				if(this.currentArticleIndex !== null){
 					this._selectArticle(this.currentArticleIndex + 1);
 				}
@@ -321,19 +319,39 @@ export class Reader {
 
 
 				// Bind bottom scroll
-				const scrollPane = this.compact === true ? $(window) : this.body.find(".reader-pane-list");
+				const scrollPane = this.compact === true ? $(window) : this.body.find(".reader-pane-list .scrollpane");
 				if(this.scrollListener !== null){
 					scrollPane.unbind("scroll.readerBottomLoad"+this.id.toString);
 				}
 				scrollPane.bind("scroll.readerBottomLoad"+this.id.toString, () => {
-					let loaderPos = this.body.find(".reader-bottom-loader").position().top;
+					const loader = this.body.find(".reader-bottom-loader");
+					if(loader.is(":hidden") === true)
+						return;
 
-					// TODO: make this work for scrollPane for large reader
-					if (this.loaded === true && window.scrollY + window.innerHeight >= loaderPos && this.isLoadingBottom === false && this.noMorePosts === false) {
-						this.isLoadingBottom = true;
-						this._appendFeedArticles(false)
-							.then(() => this.isLoadingBottom = false);
+					let loadBottom = false;
+					if(this.loaded === true && this.isLoadingBottom === false){
+						if(this.compact === true){
+							let loaderPos = loader.position().top;
+							loadBottom = window.scrollY + window.innerHeight >= loaderPos
+						}
+						else{
+							let loaderPos = loader.position().top - scrollPane.position().top;
+							loadBottom = scrollPane.innerHeight() >= loaderPos;
+						}
 					}
+
+					if(loadBottom === true){
+						if(this.noMorePosts === true){
+							// hide loader
+							loader.hide();
+						}
+						else{
+							this.isLoadingBottom = true;
+							this._appendFeedArticles(false)
+								.then(() => this.isLoadingBottom = false);
+						}
+					}
+
 				});
 			});
 	}
