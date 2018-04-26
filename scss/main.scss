@@ -17,7 +17,7 @@ $sidenav-width: 250px;
 
 
 // By default, hide all pages
-#main-container {
+#page-container {
 	> * {
 		display: none;
 	}
@@ -105,7 +105,7 @@ nav {
 				box-shadow: 5px 2px 3px 3px rgba(0, 0, 0, 0.14);
 			}
 		}
-		#main-container, .loader {
+		#page-container, .loader {
 			margin-left: $sidenav-width;
 			transition-property: margin-left;
 			transition-duration: 1s;

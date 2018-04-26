@@ -120,11 +120,11 @@ export default class MatrixClient {
 		}
 
 		return new Promise((resolve, reject) => {
-			resolve(this.requestMessages(roomID, filter, lim))
+			resolve(this._requestMessages(roomID, filter, lim))
 		})
 		.then((resp) => {
 			if (!(resp.chunk && resp.chunk.length)) {
-				return this.requestMessages(roomID, filter, lim)
+				return this._requestMessages(roomID, filter, lim)
 			}
 
 			return resp
@@ -134,7 +134,7 @@ export default class MatrixClient {
 		});
 	}
 
-	requestMessages(roomID, filter, lim) {
+	_requestMessages(roomID, filter, lim) {
 		let body = {
 			dir: "b",
 			filter: JSON.stringify(filter),
@@ -155,6 +155,23 @@ export default class MatrixClient {
 		.then((resp) => {
 			this.streamPos = resp.end;
 			return resp;
+		});
+	}
+
+
+	getMessage(roomID, eventID){
+		let body = {
+			limit: 1,
+		}
+		return ajax.req(
+			"GET",
+			this.homeserverURL,
+			"/_matrix/client/r0/rooms/" + encodeURIComponent(roomID) + "/context/" + encodeURIComponent(eventID),
+			this.accessToken,
+			body,
+		)
+		.then((resp) => {
+			return resp.event;
 		});
 	}
 }

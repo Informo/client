@@ -20,6 +20,7 @@ import * as feedsPage from "./pages/feeds";
 import * as sourcePage from "./pages/source";
 import * as discoverPage from "./pages/discover";
 import * as sidebarPage from "./pages/sidebar";
+import * as articlePage from "./pages/article";
 
 /// Router page definitions
 const routes = [
@@ -57,6 +58,12 @@ const routes = [
 		path: "/discover",
 		elmt: "#page-discover",
 		onInit: discoverPage.init,
+		onRemoved: null,
+	},
+	{
+		path: "/article/:eventID",
+		elmt: "#page-article",
+		onInit: articlePage.init,
 		onRemoved: null,
 	},
 ];
@@ -124,7 +131,7 @@ class Router {
 			return;
 		}
 
-		$("#main-container > *").hide();
+		$("#page-container > *").hide();
 		if(this.currentRoute !== null && this.currentRoute.onRemoved !== null)
 			this.currentRoute.onRemoved();
 
@@ -138,9 +145,10 @@ class Router {
 		}
 
 
-		let elmt = $("#main-container").find(this.currentRoute.elmt);
+		let elmt = $("#page-container").find(this.currentRoute.elmt);
 		elmt.show();
-		this.currentRoute.onInit();
+		if(this.currentRoute.onInit !== null)
+			this.currentRoute.onInit();
 
 		sidebarPage.updateActiveLinkButtons();
 

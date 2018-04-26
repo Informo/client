@@ -346,3 +346,14 @@ function getPartsFromMXCURL(mxcURL) {
 		mediaID: parts[2],
 	};
 }
+
+
+export function getSingleArticle(eventID) {
+	let matrixClient = null;
+
+	return getConnectedMatrixClient()
+		.then((client) => {
+			matrixClient = client;
+			return matrixClient.getMessage(storage.roomID, eventID);
+		});
+}
