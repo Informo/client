@@ -24,7 +24,7 @@ import Router from "./router";
 
 $(document).ready(function(){
 
-	$("#sidebar-button").sideNav({closeOnClick: true});
+	$("#sidebar-button").sideNav({closeOnClick: true, menuWidth: 250});
 	$(".modal").modal();
 
 	if(!storage.homeserverURL){
