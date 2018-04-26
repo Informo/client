@@ -378,7 +378,7 @@ export class Reader {
 
 				news.sort((a, b) => b.content.date - a.content.date);
 				for(let articleMxEvent of news) {
-					//TODO: handle unread
+
 					if (informoSources.canPublish(articleMxEvent.sender, articleMxEvent.type)) {
 						let content = articleMxEvent.content;
 
@@ -393,6 +393,7 @@ export class Reader {
 							content: content.content,
 							externalLink: content.link,
 
+							//TODO: handle unread
 							unread: Math.floor(Math.random() * 2) == 0,
 						});
 					}
@@ -454,7 +455,11 @@ export class Reader {
 			return;
 
 		if(this.currentArticleIndex !== null){
-			// TODO: mark this.currentArticleEventID as read if !== null
+			// TODO: mark this.currentArticleEventID as read if !== null and make it persistent
+			this.articleList[this.currentArticleIndex].unread = false;
+			this.currentArticleNode.removeClass("unread");
+			this.currentArticleNode.find(">i").text("label_outline");
+
 			this.currentArticleNode.removeClass("active");
 		}
 
