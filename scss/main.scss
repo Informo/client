@@ -2,10 +2,12 @@
 $primary-color: #417D44;
 $primary-color-light: #CAF0CC;
 $primary-color-dark: darken($primary-color, 15%);
-$secondary-color: darken($primary-color, 5%);
+$secondary-color: #3c8057;
 $link-color: #1a93b3;
 
-$collection-active-color: lighten($primary-color, 60%) !default;
+$switch-bg-color: $primary-color-light;
+$switch-checked-lever-bg: #21deb5;
+
 
 $roboto-font-path: "fonts/roboto/";
 @import "~materialize-css/sass/materialize.scss";
@@ -112,6 +114,16 @@ body.no-sidebar #sidebar-button {
 
 // Reader fragment article
 .reader-fragment {
+
+	.informo-article-content {
+		img {
+			max-width: 100%;
+		}
+		blockquote {
+			border-left-color: #417D44;
+		}
+	}
+
 	&.compact {
 		.informo-article {
 
@@ -146,33 +158,55 @@ body.no-sidebar #sidebar-button {
 					vertical-align: middle;
 				}
 			}
-			.informo-article-content {
-				img {
-					max-width: 100%;
-				}
-				blockquote {
-					border-left-color: #417D44;
-				}
-			}
 		}
 	}
 
 	&:not(.compact){
 		display: flex;
+		overflow-y: hidden;
 		justify-content: center;
 
+		.scrollpane{
+			overflow-y: auto;
+		}
+
+		nav {
+			// background-color: $secondary-color;
+			z-index: 997;
+			.brand-logo {
+				padding-left: 0.5em;
+			}
+
+			.switch {
+				padding: 0 0.5em;
+			}
+		}
 
 		.reader-pane-list {
-			flex-basis: 35%;
-			overflow-y: auto;
 			background-color: #ccc;
 
+			flex-basis: 35%;
+			overflow: hidden;//or else the pane will take all screen space
+
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+
+			nav {
+				@media only screen and (max-width: 992px) {
+					.brand-logo {
+						left: 0;
+						transform: none;
+					}
+				}
+			}
+
 			.collection {
+				flex-basis: 35%;
+				flex: 1;
 				border: none;
 				margin: 0;
-				.collection-item {
-					width: 100%;
-				}
+
 				.article-list {
 					.flow-text{
 						font-weight: 300;
@@ -204,12 +238,17 @@ body.no-sidebar #sidebar-button {
 		}
 		.reader-pane-article {
 			flex-basis: 65%;
-			overflow-y: auto;
+			overflow: hidden;//or else the pane will take all screen space
+
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+
 
 			.article-title-bar {
 				margin-top: -5em;
 				padding-top: 5em;
-				background-color: $primary-color-light;
+				background-color: #ddd;
 
 				.informo-article-details {
 					padding: 1em;
@@ -222,8 +261,24 @@ body.no-sidebar #sidebar-button {
 					}
 				}
 			}
-			.informo-article-intro {
-				margin: 2em 0;
+			.informo-article-container {
+				flex: 1;
+				.informo-article-intro {
+					margin: 2em 0;
+				}
+
+				.end-spacer {
+					height: 10em;
+				}
+			}
+
+			> a {
+				position: absolute;
+				margin: 1em;
+				bottom: 0em;
+				&.right {
+					right: 0;
+				}
 			}
 		}
 	}

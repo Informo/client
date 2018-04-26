@@ -32,6 +32,8 @@ let reader = null;
 export function init(title, type){
 	// TODO: we'll need later a better handling of unread / all selection
 
+	$(".navbar-fixed").hide();//TODO: will make impossible to open the side nav
+
 	if(reader === null){
 		reader = new Reader($("#page-feeds .reader"), false);
 	}
@@ -69,3 +71,6 @@ export function init(title, type){
 
 }
 
+export function remove(){
+	$(".navbar-fixed").show();
+}

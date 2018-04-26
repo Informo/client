@@ -30,23 +30,23 @@ const template = [
 		body: $(`
 			<div class="reader-fragment">
 				<div class="reader-pane-list">
-					<div class="reader-request-loader center-align">
-						<div class="preloader-wrapper active">
-							<div class="spinner-layer spinner-green-only">
-								<div class="circle-clipper left">
-									<div class="circle"></div>
-								</div><div class="gap-patch">
-									<div class="circle"></div>
-								</div><div class="circle-clipper right">
-									<div class="circle"></div>
-								</div>
-							</div>
+					<nav>
+						<div class="nav-wrapper z-depth-1">
+							<span class="brand-logo flow-text">News</span>
+							<ul class="right">
+								<li>
+									<div class="switch">
+										<label>Unread <input type="checkbox"><span class="lever"></span> All</label>
+									</div>
+								</li>
+								<li><a href="#"><i class="material-icons">settings</i></a></li>
+							</ul>
 						</div>
-					</div>
-					<ul class="collection with-header">
+					</nav>
+					<ul class="reader-loaded-content collection scrollpane">
 
 						<div class="article-list"></div>
-						<li class="reader-bottom-loader reader-loaded-content center-align">
+						<li class="reader-bottom-loader center-align">
 							<div class="preloader-wrapper active">
 								<div class="spinner-layer spinner-green-only">
 									<div class="circle-clipper left">
@@ -60,9 +60,6 @@ const template = [
 							</div>
 						</li>
 					</ul>
-				</div>
-
-				<div class="reader-pane-article z-depth-1">
 					<div class="reader-request-loader center-align">
 						<div class="preloader-wrapper active">
 							<div class="spinner-layer spinner-green-only">
@@ -75,9 +72,26 @@ const template = [
 								</div>
 							</div>
 						</div>
-						<div class="reader-request-loader-text flow-text"></div>
 					</div>
-					<div class="reader-article reader-loaded-content">
+				</div>
+
+				<div class="reader-pane-article z-depth-1">
+					<nav>
+						<div class="nav-wrapper z-depth-1">
+							<ul>
+								<li><a href="#"><i class="material-icons">format_size</i></a></li>
+							</ul>
+							<a class="brand-logo center" href="#">
+								<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
+							</a>
+							<ul class="right">
+								<li><a href="#"><i class="material-icons">markunread</i></a></li>
+								<li><a href="#"><i class="material-icons">bookmark</i></a></li>
+								<li><a href="#"><i class="material-icons">share</i></a></li>
+							</ul>
+						</div>
+					</nav>
+					<div class="reader-loaded-content scrollpane">
 						<div class="article-title-bar z-depth-1">
 							<div class="container">
 								<h3 class="informo-article-title flow-text">{{TITLE}}</h3>
@@ -94,13 +108,30 @@ const template = [
 								</div>
 							</div>
 						</div>
-						<div class="container">
+						<div class="informo-article-container container">
 							<p class="informo-article-intro">
 								{{DESCRIPTION}}
 							</p>
 							<p class="informo-article-content">
+							<div class="end-spacer"></div>
 						</div>
 					</div>
+					<div class="reader-request-loader center-align">
+						<div class="preloader-wrapper active">
+							<div class="spinner-layer spinner-green-only">
+								<div class="circle-clipper left">
+									<div class="circle"></div>
+								</div><div class="gap-patch">
+									<div class="circle"></div>
+								</div><div class="circle-clipper right">
+									<div class="circle"></div>
+								</div>
+							</div>
+						</div>
+						<div class="reader-request-loader-text flow-text"></div>
+					</div>
+					<a class="btn-floating waves-effect waves-light left"><i class="material-icons">navigate_before</i></a>
+					<a class="btn-floating waves-effect waves-light right"><i class="material-icons">navigate_next</i></a>
 				</div>
 			</div>
 		`),
@@ -439,7 +470,7 @@ export class Reader {
 
 		// Set separated pane article content on large reader
 		if(this.compact === false){
-			const largeArticle = this.body.find(".reader-article");
+			const largeArticle = this.body.find(".reader-pane-article");
 
 			// Display at least one article
 			if(this.currentArticleEventID === null)

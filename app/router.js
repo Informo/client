@@ -33,19 +33,19 @@ const routes = [
 		path: "/feeds/all",
 		elmt: "#page-feeds",
 		onInit: () => { feedsPage.init("All your feeds", "all"); },
-		onRemoved: null,
+		onRemoved: feedsPage.remove,
 	},
 	{
 		path: "/feeds/unread",
 		elmt: "#page-feeds",
 		onInit: () => { feedsPage.init("Unread articles", "unread"); },
-		onRemoved: null,
+		onRemoved: feedsPage.remove,
 	},
 	{
 		path: "/feeds/source/:sourceName",
 		elmt: "#page-feeds",
 		onInit: () => { feedsPage.init(null, "source"); },
-		onRemoved: null,
+		onRemoved: feedsPage.remove,
 	},
 	{
 		path: "/source/:sourceName",
