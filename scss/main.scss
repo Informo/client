@@ -314,10 +314,14 @@ body.no-sidebar #sidebar-button {
 	.card-container {
 		display: flex;
 		align-items: flex-start;
+		justify-content: space-around;
 		flex-wrap: wrap;
 
 		> .source-card {
 			margin: 1em;
+			min-width: 250px;
+			max-width: 350px;
+			flex: 1;
 		}
 	}
 }
