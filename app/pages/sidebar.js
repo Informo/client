@@ -84,9 +84,9 @@ export function updateUserSourceList(){
 	if(storage.userSources !== lastSourceList){
 
 		$("#sidebar .informo-source-link").remove();
-		let appender = $("#sourcelist-append");
+		let appender = $("#sidebar .sourcelist-append");
 
-		$("#sidebar #sourcelist-load").hide();
+		$("#sidebar .sourcelist-load").hide();
 
 		$("#sidebar .sourcelist-placeholder").toggle(storage.userSources.length === 0);
 
@@ -140,8 +140,20 @@ export function updateUserSourceList(){
 
 		}
 
+		updateActiveLinkButtons();
+
 		lastSourceList = informoSources.sources;
 	}
 
 
+}
+
+export function updateActiveLinkButtons(){
+	const href = window.location.hash;
+
+	$("#sidebar li").each((i, li) => {
+		const listItem = $(li);
+		const link = listItem.find("> a:first-child");
+		$(listItem).toggleClass("active", $(link).attr("href") === href);
+	});
 }

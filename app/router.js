@@ -142,6 +142,8 @@ class Router {
 		elmt.show();
 		this.currentRoute.onInit();
 
+		sidebarPage.updateActiveLinkButtons();
+
 	}
 
 	/// Return a path parameter value
