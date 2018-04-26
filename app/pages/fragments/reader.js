@@ -130,8 +130,8 @@ const template = [
 						</div>
 						<div class="reader-request-loader-text flow-text"></div>
 					</div>
-					<a class="btn-floating waves-effect waves-light left"><i class="material-icons">navigate_before</i></a>
-					<a class="btn-floating waves-effect waves-light right"><i class="material-icons">navigate_next</i></a>
+					<a class="previous-article btn-floating waves-effect waves-light left disabled" href="#"><i class="material-icons">navigate_before</i></a>
+					<a class="next-article btn-floating waves-effect waves-light right disabled" href="#"><i class="material-icons">navigate_next</i></a>
 				</div>
 			</div>
 		`),
@@ -216,8 +216,8 @@ const template = [
 	},
 ];
 
-let readerId = 0;
 
+let readerId = 0;
 
 export class Reader {
 	/// container: where necessary HTML will be injected
@@ -248,11 +248,26 @@ export class Reader {
 			});
 			this.body.height($(window).height() - this.body.position().top);
 
-
+			this.body.find(".previous-article").bind("click", () => {
+				console.log("Click");
+				if(this.currentArticleIndex !== null){
+					this._selectArticle(this.currentArticleIndex - 1);
+				}
+				return false;
+			});
+			this.body.find(".next-article").bind("click", () => {
+				console.log("Click");
+				if(this.currentArticleIndex !== null){
+					this._selectArticle(this.currentArticleIndex + 1);
+				}
+				return false;
+			});
 		}
 	}
 	/// Remove all feeds
 	reset(){
+		this.articleList = [];
+
 		this.loaded = false;
 		this.isLoadingBottom = false;
 		this.noMorePosts = false;
@@ -260,7 +275,7 @@ export class Reader {
 		this.showUnreadOnly = false;
 
 		// Only used for large view
-		this.currentArticleEventID = null;
+		this.currentArticleIndex = null;
 		this.currentArticleNode = null;
 
 		this.body.find(".reader-request-loader").show();
@@ -348,18 +363,31 @@ export class Reader {
 					//TODO: handle unread
 					if (informoSources.canPublish(articleMxEvent.sender, articleMxEvent.type)) {
 						let content = articleMxEvent.content;
-						this._addArticle(
-							articleMxEvent.event_id,
-							content.headline,
-							content.description,
-							content.author,
-							content.thumbnail,
-							informoSources.sources[articleMxEvent.type].name,
-							content.date,
-							content.content,
-							content.link
-						);
+
+						this.articleList.push({
+							id: articleMxEvent.event_id,
+							title: content.headline,
+							description: content.description,
+							author: content.author,
+							image: content.thumbnail,
+							sourceName: informoSources.sources[articleMxEvent.type].name,
+							date: content.date,
+							content: content.content,
+							externalLink: content.link,
+
+							unread: Math.floor(Math.random() * 2) == 0,
+						});
 					}
+				}
+
+				for(let [i, article] of this.articleList.entries()){
+					this._appendArticle(article, i);
+				}
+
+				// Select first article
+				if(this.compact === false){
+					if(this.currentArticleIndex === null)
+						this._selectArticle(0);
 				}
 
 				this.loaded = true;
@@ -377,9 +405,56 @@ export class Reader {
 	/// ts: timestamp the article has been posted
 	/// content: HTML content
 	/// href: original article link (on the news site)
-	_addArticle(articleID, title, description, author, image, source, ts, content, href){
-		let article = template[this.compact === true ? 1 : 0].article.clone();
+	_appendArticle(article, articleIndex){
+		let articleDOM = template[this.compact === true ? 1 : 0].article.clone();
 
+		articleDOM.attr("data-article-index", articleIndex);
+
+		// Set article content in the list
+		this._setArticleDOMContent(article, articleDOM);
+
+		// Set separated pane article content on large reader
+		if(this.compact === false){
+			const articlePane = this.body.find(".reader-pane-article");
+
+			// Setup article display on selection
+			const reader = this;
+			articleDOM.bind("click", () => {
+				reader._selectArticle(articleIndex);
+				return false;
+			});
+		}
+
+		this.body.find(".article-list").append(articleDOM);
+	}
+
+	// Triggered by clicking on an article on the large reader
+	_selectArticle(articleIndex){
+		console.assert(this.compact === false, "_selectArticle called on non compact reader");
+
+		if(articleIndex >= this.articleList.length || articleIndex < 0)
+			return;
+
+		if(this.currentArticleIndex !== null){
+			// TODO: mark this.currentArticleEventID as read if !== null
+			this.currentArticleNode.removeClass("active");
+		}
+
+		this.currentArticleIndex = articleIndex;
+		this.currentArticleNode = this.body.find(".article-list > [data-article-index="+articleIndex+"]");
+
+		this.currentArticleNode.addClass("active");
+		this._setArticleDOMContent(
+			this.articleList[articleIndex],
+			this.body.find(".reader-pane-article"));
+
+		// Previous / next buttons disabling
+		this.body.find(".previous-article").toggleClass("disabled", this.currentArticleIndex <= 0);
+		this.body.find(".next-article").toggleClass("disabled", this.currentArticleIndex >= this.articleList.length - 1);
+	}
+
+
+	_setArticleDOMContent(articleData, targetDOM){
 		function getTimeAgoString(dateDiff){
 			const seconds = dateDiff / 1000;
 			var interval = Math.floor(seconds / 31536000);
@@ -405,85 +480,43 @@ export class Reader {
 			element.find("a").attr("onclick", "return externalLink(this)");
 		}
 
-		function setArticleContent(article){
-			// Title
-			article.find(".informo-article-title").text(title);
-			// Image
-			if(image && image !== null)
-				article.addClass("with-img");
-			article.find(".informo-article-image img, img.informo-article-image").attr("src", image);
-			// Author
-			if (author) {
-				article.find(".informo-article-author").text(author);
-			} else {
-				article.find(".informo-article-author").remove();
-			}
-			// Source
-			article.find("a.informo-article-source").attr("href", href);
-			article.find(":not(a).informo-article-source").text(source);
-			// Date
-			const date = new Date(ts*1000);
-			const dateDiff = new Date() - date;
-			article.find(".informo-article-date").text(getTimeAgoString(dateDiff) + " ago");
-
-			// Link to this article on informo
-			article.find("a.informo-article-anchor").attr("href", "#"); //TODO
-
-			// Article content
-			setSanitizedHtmlContent(article.find(".informo-article-intro"), description);
-			setSanitizedHtmlContent(article.find(".informo-article-content"), content);
-
+		// Title
+		targetDOM.find(".informo-article-title").text(articleData.title);
+		// Image
+		if(articleData.image && articleData.image !== null)
+			targetDOM.addClass("with-img");
+		targetDOM.find(".informo-article-image img, img.informo-article-image")
+			.attr("src", articleData.image);
+		// Author
+		if (articleData.author) {
+			targetDOM.find(".informo-article-author").text(articleData.author);
+		} else {
+			targetDOM.find(".informo-article-author").remove();
 		}
+		// Source
+		targetDOM.find("a.informo-article-source").attr("href", articleData.externalLink);
+		targetDOM.find(":not(a).informo-article-source").text(articleData.sourceName);
+		// Date
+		const date = new Date(articleData.date * 1000);
+		const dateDiff = new Date() - date;
+		targetDOM.find(".informo-article-date").text(getTimeAgoString(dateDiff) + " ago");
 
+		// Link to this article on informo
+		targetDOM.find("a.informo-article-anchor").attr("href", "#"); //TODO
 
 		//Unread marker
 		if(this.compact === true){
 			// TODO
 		}
 		else{
-			const isUnread = Math.floor(Math.random() * 2) == 0;//TODO
-			article.find(">i").text(isUnread ? "label" : "label_outline");
-			if(isUnread === true)
-				article.addClass("unread");
-
+			targetDOM.find(">i").text(articleData.unread ? "label" : "label_outline");
+			if(articleData.unread === true)
+				targetDOM.addClass("unread");
 		}
 
-		// Set article content in the list
-		setArticleContent(article);
-
-
-		const reader = this;
-
-		// Selects the current article (only for large reader)
-		function selectArticle(targetContent){
-			if(reader.currentArticleEventID !== null){
-				// TODO: mark this.currentArticleEventID as read if !== null
-				reader.currentArticleNode.removeClass("active");
-			}
-
-			article.addClass("active");
-			setArticleContent(targetContent);
-
-			reader.currentArticleEventID = articleID;
-			reader.currentArticleNode = article;
-		}
-
-		// Set separated pane article content on large reader
-		if(this.compact === false){
-			const largeArticle = this.body.find(".reader-pane-article");
-
-			// Display at least one article
-			if(this.currentArticleEventID === null)
-				selectArticle(largeArticle);
-
-			// Setup article display on selection
-			article.bind("click", () => {
-				selectArticle(largeArticle);
-				return false;
-			});
-		}
-
-		this.body.find(".article-list").append(article);
+		// Article content
+		setSanitizedHtmlContent(targetDOM.find(".informo-article-intro"), articleData.description);
+		setSanitizedHtmlContent(targetDOM.find(".informo-article-content"), articleData.content);
 	}
 }
 
