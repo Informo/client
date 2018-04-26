@@ -88,6 +88,8 @@ export function updateUserSourceList(){
 
 		$("#sidebar #sourcelist-load").hide();
 
+		$("#sidebar .sourcelist-placeholder").toggle(storage.userSources.length === 0);
+
 		let i = 0;
 
 		for(let sourceName of storage.userSources){

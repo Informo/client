@@ -53,7 +53,6 @@ limitations under the License.
 			<li class="navbar-if-notsetup"><a href="#/connect"><i class="material-icons">error_outline</i>Select a server</a></li>
 
 			<li class="navbar-if-connected"><a href="#/feeds/all"><i class="material-icons">rss_feed</i>All your feeds</a></li>
-			<li class="navbar-if-connected"><a href="#/feeds/unread"><i class="material-icons">markunread_mailbox</i>Unread</a></li>
 			<li class="navbar-if-connected"><div class="divider"></div></li>
 			<li id="sourcelist-load" class="navbar-if-notconnected">
 				<div class="preloader-wrapper small active">
@@ -68,7 +67,11 @@ limitations under the License.
 					</div>
 				</div>
 			</li>
+			<li class="sourcelist-placeholder navbar-if-connected">
+				<a href="#/discover">You currently have no feeds<br/>Click here to add some feeds</a>
+			</li>
 			<li id="sourcelist-append" class="navbar-if-connected"></li>
+			<li class="navbar-if-connected"><div class="divider"></div></li>
 			<li class="navbar-if-connected"><a href="#/discover"><i class="material-icons">add_circle_outline</i> More feeds</a></li>
 		</ul>
 
