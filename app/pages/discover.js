@@ -38,8 +38,8 @@ const tempateCard = $(`
 			</ul>
 		</div>
 		<div class="card-action">
-			<a class="add-button btn-floating waves-effect waves-light informo-bg-green" title="Add feed"><i class="material-icons">add</i></a>
-			<a class="view-button btn-floating waves-effect waves-light informo-bg-green right" title="View source page"><i class="material-icons">pageview</i></a>
+			<a class="add-button btn-floating waves-effect waves-light informo-bg-green" title="Add feed" href="#"><i class="material-icons">add</i></a>
+			<a class="view-button btn-floating waves-effect waves-light informo-bg-green right" title="View source page" href="#"><i class="material-icons">pageview</i></a>
 		</div>
 	</div>
 	`);
