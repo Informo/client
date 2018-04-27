@@ -1,0 +1,165 @@
+// Copyright 2018 Informo core team <core@informo.network>
+//
+// Licensed under the GNU Affero General Public License, Version 3.0
+// (the "License"); you may not use this file except in compliance with the
+// License.
+// You may obtain a copy of the License at
+//
+//     https://www.gnu.org/licenses/agpl-3.0.html
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+.feed-reader-fragment {
+
+	&.compact {
+		.informo-article {
+			&.with-img .collapsible-header{
+				.article-header-text {
+					flex: 1;
+				}
+				.article-header-image {
+					max-width: 25%;
+					margin: -15px -15px -15px 0;
+
+					img {
+						max-height: 200px;
+						max-width: 100%;
+					}
+				}
+			}
+			.informo-article-title {
+				font-weight: bold;
+			}
+			.informo-article-details {
+				margin: -30px -30px 0 -30px;
+				padding: 1em;
+
+				> * {
+					padding: 0 1em;
+				}
+				i {
+					vertical-align: middle;
+				}
+			}
+			.informo-article-intro {
+				padding: 1em 1em 0 0;
+			}
+			.informo-article-content {
+				img {
+					max-width: 100%;
+				}
+				blockquote {
+					border-left-color: #417D44;
+				}
+			}
+		}
+	}
+
+	&:not(.compact){
+		display: flex;
+		overflow-y: hidden;
+		justify-content: center;
+
+		nav {
+			// background-color: $secondary-color;
+			z-index: 997;
+			.brand-logo {
+				padding-left: 0.5em;
+			}
+
+			.switch {
+				padding: 0 0.5em;
+			}
+		}
+
+		.reader-pane-list {
+			background-color: #ccc;
+
+			flex-basis: 35%;
+			overflow: hidden;//or else the pane will take all screen space
+
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+
+			nav {
+				@media only screen and (max-width: 992px) {
+					.brand-logo {
+						left: 0;
+						transform: none;
+					}
+				}
+			}
+
+			.collection {
+				flex-basis: 35%;
+				flex: 1;
+				border: none;
+				margin: 0;
+
+				.article-list {
+					.flow-text{
+						font-weight: 300;
+						$i: 0;
+						@while $i <= $intervals {
+							@media only screen and (min-width : 360 + ($i * $interval-size)) {
+								font-size: 0.9rem * (1 + (.02 * $i));
+							}
+							$i: $i + 1;
+						}
+						// Handle below 360px screen
+						@media only screen and (max-width: 360px) {
+							font-size: 0.9rem;
+						}
+					}
+
+					i {
+						vertical-align: text-bottom;
+					}
+
+					> a.unread * {
+						font-weight: 400;
+					}
+					> a:not(.unread) * {
+						font-weight: 300;
+					}
+				}
+			}
+		}
+		.reader-pane-article {
+			flex-basis: 65%;
+			overflow: hidden;//or else the pane will take all screen space
+
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+
+			.article-reader-fragment {
+				height: 100%;
+			}
+		}
+	}
+
+	.informo-article-content {
+		img {
+			max-width: 100%;
+		}
+		blockquote {
+			border-left-color: #417D44;
+		}
+	}
+
+	.feed-reader-loader {
+		margin: 5em;
+	}
+	.feed-reader-bottom-loader {
+		text-align: center;
+		display: none;
+	}
+
+
+}
