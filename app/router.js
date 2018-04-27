@@ -64,7 +64,7 @@ const routes = [
 		path: "/article/:eventID",
 		elmt: "#page-article",
 		onInit: articlePage.init,
-		onRemoved: null,
+		onRemoved: articlePage.remove,
 	},
 ];
 
@@ -72,7 +72,7 @@ const routes = [
 const route404 = {
 	path: "/404",
 	elmt: "#page-404",
-	onInit: function(){},
+	onInit: null,
 	onRemoved: null,
 };
 

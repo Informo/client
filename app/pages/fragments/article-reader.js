@@ -16,26 +16,28 @@
 
 // Reader fragment to read a single article
 
-import informoSources from "../../sources";
+import $ from "jquery";
 import * as matrix from "../../matrix";
 
 const template = $(`
 	<div class="article-reader-fragment">
-		<nav>
-			<div class="nav-wrapper z-depth-1">
-				<ul>
-					<li><a href="#"><i class="material-icons">format_size</i></a></li>
-				</ul>
-				<a class="brand-logo center" href="#">
-					<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
-				</a>
-				<ul class="right">
-					<li><a href="#"><i class="material-icons">markunread</i></a></li>
-					<li><a href="#"><i class="material-icons">bookmark</i></a></li>
-					<li><a href="#"><i class="material-icons">share</i></a></li>
-				</ul>
-			</div>
-		</nav>
+		<div class="navbar">
+			<nav>
+				<div class="nav-wrapper z-depth-1">
+					<ul>
+						<li><a href="#"><i class="material-icons">format_size</i></a></li>
+					</ul>
+					<a class="brand-logo center" href="#">
+						<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
+					</a>
+					<ul class="right">
+						<li><a href="#"><i class="material-icons">markunread</i></a></li>
+						<li><a href="#"><i class="material-icons">bookmark</i></a></li>
+						<li><a href="#"><i class="material-icons">share</i></a></li>
+					</ul>
+				</div>
+			</nav>
+		</div>
 		<div class="article-reader-loaded scrollpane">
 			<div class="article-title-bar z-depth-1 grey lighten-3">
 				<div class="container">
@@ -83,7 +85,7 @@ const template = $(`
 
 export class ArticleReader {
 
-	constructor(container, showPrevNextButtons, showLoader = true) {
+	constructor(container, showPrevNextButtons, showLoader = true, fixedTopBar = false) {
 		this.body = template.clone();
 
 		// Previous / Next buttons
@@ -99,6 +101,10 @@ export class ArticleReader {
 		this.body.find(".article-reader-loaded").hide();
 
 		this.body.find(".article-reader-loader").toggle(showLoader);
+
+		if(fixedTopBar === true){
+			this.body.find(".navbar").addClass("navbar-fixed");
+		}
 
 
 		container.append(this.body);

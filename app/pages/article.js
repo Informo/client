@@ -19,17 +19,22 @@ import Router from "../router";
 import Sources from "../sources";
 import {newsEventPrefix} from "../const";
 import * as matrix from "../matrix";
-import {FeedReader} from "./fragments/feed-reader";
+import {ArticleReader} from "./fragments/article-reader";
 import $ from "jquery";
 
 
-export function init(){
-	matrix.getSingleArticle(Router.getPathParamValue("eventID"))
-		.then((article) => {
-			console.log("Article: ", article);
-		});
+let reader = null;
 
+export function init(){
+	$("body > .navbar-fixed").hide();//TODO: will make impossible to open the side nav
+
+	if(reader === null){
+		reader = new ArticleReader($("#page-article"), false, true, true);
+	}
+
+	reader.fetchContent(Router.getPathParamValue("eventID"));
 }
 
 export function remove(){
+	$("body > .navbar-fixed").show();
 }
