@@ -19,7 +19,7 @@ import $ from "jquery";
 import storage from "../storage";
 import router from "../router";
 
-import {Reader} from "./fragments/reader";
+import {FeedReader} from "./fragments/feed-reader";
 import informoSources from "../sources";
 import {newsEventPrefix} from "../const";
 
@@ -35,7 +35,7 @@ export function init(title, type){
 	$(".navbar-fixed").hide();//TODO: will make impossible to open the side nav
 
 	if(reader === null){
-		reader = new Reader($("#page-feeds .reader"), false);
+		reader = new FeedReader($("#page-feeds .feed-reader"), false);
 	}
 
 

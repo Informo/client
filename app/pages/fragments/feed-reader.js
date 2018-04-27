@@ -22,13 +22,15 @@ import informoSources from "../../sources";
 import * as matrix from "../../matrix";
 import {newsEventPrefix} from "../../const";
 
+import {ArticleReader} from "./article-reader";
+
 
 
 const template = [
 	{
 		// Paned / large view
 		body: $(`
-			<div class="reader-fragment">
+			<div class="feed-reader-fragment">
 				<div class="reader-pane-list">
 					<nav>
 						<div class="nav-wrapper z-depth-1">
@@ -43,10 +45,24 @@ const template = [
 							</ul>
 						</div>
 					</nav>
-					<ul class="reader-loaded-content collection scrollpane">
+					<div class="feed-reader-loader center-align">
+						<div class="preloader-wrapper active">
+							<div class="spinner-layer spinner-green-only">
+								<div class="circle-clipper left">
+									<div class="circle"></div>
+								</div><div class="gap-patch">
+									<div class="circle"></div>
+								</div><div class="circle-clipper right">
+									<div class="circle"></div>
+								</div>
+							</div>
+						</div>
+						<div class="text flow-text"></div>
+					</div>
+					<ul class="feed-reader-loaded-content collection scrollpane">
 
-						<div class="article-list"></div>
-						<li class="reader-bottom-loader center-align">
+						<div class="feed-reader-article-list"></div>
+						<li class="feed-reader-bottom-loader center-align">
 							<div class="preloader-wrapper active">
 								<div class="spinner-layer spinner-green-only">
 									<div class="circle-clipper left">
@@ -60,79 +76,9 @@ const template = [
 							</div>
 						</li>
 					</ul>
-					<div class="reader-request-loader center-align">
-						<div class="preloader-wrapper active">
-							<div class="spinner-layer spinner-green-only">
-								<div class="circle-clipper left">
-									<div class="circle"></div>
-								</div><div class="gap-patch">
-									<div class="circle"></div>
-								</div><div class="circle-clipper right">
-									<div class="circle"></div>
-								</div>
-							</div>
-						</div>
-					</div>
 				</div>
 
-				<div class="reader-pane-article z-depth-1">
-					<nav>
-						<div class="nav-wrapper z-depth-1">
-							<ul>
-								<li><a href="#"><i class="material-icons">format_size</i></a></li>
-							</ul>
-							<a class="brand-logo center" href="#">
-								<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
-							</a>
-							<ul class="right">
-								<li><a href="#"><i class="material-icons">markunread</i></a></li>
-								<li><a href="#"><i class="material-icons">bookmark</i></a></li>
-								<li><a href="#"><i class="material-icons">share</i></a></li>
-							</ul>
-						</div>
-					</nav>
-					<div class="reader-loaded-content scrollpane">
-						<div class="article-title-bar z-depth-1">
-							<div class="container">
-								<h3 class="informo-article-title flow-text">{{TITLE}}</h3>
-								<div class="informo-article-publication">
-									<span class="informo-article-author">{{AUTHOR}}</span>
-									<span class="informo-article-source">{{SOURCE}}</span>
-									-
-									<span class="informo-article-date">{{DATE}}</span>
-								</div>
-
-								<div class="informo-article-details">
-									<a class="informo-article-anchor" href="{{LINK}}"><i class="material-icons">link</i> Informo article link</a>
-									<a class="informo-article-source" href="{{LINK}}" onclick="return externalLink(this)"><i class="material-icons">open_in_new</i> Original article</a>
-								</div>
-							</div>
-						</div>
-						<div class="informo-article-container container">
-							<p class="informo-article-intro">
-								{{DESCRIPTION}}
-							</p>
-							<p class="informo-article-content">
-							<div class="end-spacer"></div>
-						</div>
-					</div>
-					<div class="reader-request-loader center-align">
-						<div class="preloader-wrapper active">
-							<div class="spinner-layer spinner-green-only">
-								<div class="circle-clipper left">
-									<div class="circle"></div>
-								</div><div class="gap-patch">
-									<div class="circle"></div>
-								</div><div class="circle-clipper right">
-									<div class="circle"></div>
-								</div>
-							</div>
-						</div>
-						<div class="reader-request-loader-text flow-text"></div>
-					</div>
-					<a class="previous-article btn-floating waves-effect waves-light left disabled" href="#"><i class="material-icons">navigate_before</i></a>
-					<a class="next-article btn-floating waves-effect waves-light right disabled" href="#"><i class="material-icons">navigate_next</i></a>
-				</div>
+				<div class="reader-pane-article z-depth-1"></div>
 			</div>
 		`),
 		article: $(`
@@ -151,8 +97,8 @@ const template = [
 	{
 		// Compact view
 		body: $(`
-			<div class="reader-fragment compact">
-				<div class="reader-request-loader center-align">
+			<div class="feed-reader-fragment compact">
+				<div class="feed-reader-loader center-align">
 					<div class="preloader-wrapper active">
 						<div class="spinner-layer spinner-green-only">
 							<div class="circle-clipper left">
@@ -164,12 +110,12 @@ const template = [
 							</div>
 						</div>
 					</div>
-					<div class="reader-request-loader-text flow-text"></div>
+					<div class="text flow-text"></div>
 				</div>
 
-				<ul class="article-list reader-loaded-content collapsible popout" data-collapsible="accordion"></ul>
+				<ul class="feed-reader-article-list feed-reader-loaded-content collapsible popout" data-collapsible="accordion"></ul>
 
-				<div class="reader-bottom-loader reader-loaded-content center-align">
+				<div class="feed-reader-bottom-loader feed-reader-loaded-content center-align">
 					<div class="preloader-wrapper active">
 						<div class="spinner-layer spinner-green-only">
 							<div class="circle-clipper left">
@@ -219,7 +165,7 @@ const template = [
 
 let readerId = 0;
 
-export class Reader {
+export class FeedReader {
 	/// container: where necessary HTML will be injected
 	/// compact: true to make
 	constructor(container, compact){
@@ -235,12 +181,19 @@ export class Reader {
 
 		this.reset();
 
+		// Show loader & hide content
+		this.body.find(".feed-reader-loader").show();
+		this.body.find(".feed-reader-loaded-content").hide();
+
+		// Populate body
 		container.append(this.body);
 
 		if(this.compact === true){
-			this.body.find(".article-list").collapsible();
+			this.body.find(".feed-reader-article-list").collapsible();
 		}
 		else{
+			this.articleReader = new ArticleReader(this.body.find(".reader-pane-article"), true, false);
+
 			// TODO: handle unbind
 			const body = this.body;
 			$(window).bind("resize", function(){
@@ -248,15 +201,17 @@ export class Reader {
 			});
 			this.body.height($(window).height() - this.body.position().top);
 
-			this.body.find(".previous-article").bind("click", () => {
+			this.articleReader.previousButton.bind("click", () => {
 				if(this.currentArticleIndex !== null){
 					this._selectArticle(this.currentArticleIndex - 1);
+					//TODO: scroll to show selected article
 				}
 				return false;
 			});
-			this.body.find(".next-article").bind("click", () => {
+			this.articleReader.nextButton.bind("click", () => {
 				if(this.currentArticleIndex !== null){
 					this._selectArticle(this.currentArticleIndex + 1);
+					//TODO: scroll to show selected article
 				}
 				return false;
 			});
@@ -276,9 +231,8 @@ export class Reader {
 		this.currentArticleIndex = null;
 		this.currentArticleNode = null;
 
-		this.body.find(".reader-request-loader").show();
-		this.body.find(".reader-loaded-content").hide();
-		this.body.find(".article-list .informo-article").remove();
+		// Empty article list
+		this.body.find(".feed-reader-article-list .informo-article").remove();
 	}
 
 	deactivate(){
@@ -314,8 +268,8 @@ export class Reader {
 
 		this._appendFeedArticles(true, true)
 			.then(() => {
-				this.body.find(".reader-request-loader").hide();
-				this.body.find(".reader-loaded-content").show();
+				this.body.find(".feed-reader-loader").hide();
+				this.body.find(".feed-reader-loaded-content").show();
 
 
 				// Bind bottom scroll
@@ -324,7 +278,7 @@ export class Reader {
 					scrollPane.unbind("scroll.readerBottomLoad"+this.id.toString);
 				}
 				scrollPane.bind("scroll.readerBottomLoad"+this.id.toString, () => {
-					const loader = this.body.find(".reader-bottom-loader");
+					const loader = this.body.find(".feed-reader-bottom-loader");
 					if(loader.is(":hidden") === true)
 						return;
 
@@ -332,7 +286,7 @@ export class Reader {
 					if(this.loaded === true && this.isLoadingBottom === false){
 						if(this.compact === true){
 							let loaderPos = loader.position().top;
-							loadBottom = window.scrollY + window.innerHeight >= loaderPos
+							loadBottom = window.scrollY + window.innerHeight >= loaderPos;
 						}
 						else{
 							let loaderPos = loader.position().top - scrollPane.position().top;
@@ -359,58 +313,42 @@ export class Reader {
 
 
 	_appendFeedArticles(resetPos, reportProgress = false) {
+		const loaderText = this.body.find(".feed-reader-loader .text");
 		if(reportProgress === true)
-			this.body.find(".reader-request-loader .reader-request-loader-text").text("Waiting connection to Informo...");
+			loaderText.text("Waiting connection to Informo...");
 
 		return matrix.getConnectedMatrixClient()
 			.then(() => {
 				if(reportProgress === true)
-					this.body.find(".reader-request-loader .reader-request-loader-text").text("Fetching news...");
+					loaderText.text("Fetching news...");
 
 				return matrix.getNews(this.sourceClassNames, resetPos);
 			})
 			.then((news) => {
 				if (!(news && news.length)) {
 					this.noMorePosts = true;
-					this.body.find(".reader-bottom-loader").hide();
+					this.body.find(".feed-reader-bottom-loader").hide();
 					return;
 				}
 
-				news.sort((a, b) => b.content.date - a.content.date);
-				for(let articleMxEvent of news) {
+				// Remove non allowed content
+				this.articleList = news.filter((a) => a.allowed === true);
 
-					if (informoSources.canPublish(articleMxEvent.sender, articleMxEvent.type)) {
-						let content = articleMxEvent.content;
-
-						this.articleList.push({
-							id: articleMxEvent.event_id,
-							title: content.headline,
-							description: content.description,
-							author: content.author,
-							image: content.thumbnail,
-							sourceName: informoSources.sources[articleMxEvent.type].name,
-							date: content.date,
-							content: content.content,
-							externalLink: content.link,
-
-							//TODO: handle unread
-							unread: Math.floor(Math.random() * 2) == 0,
-						});
-					}
-				}
+				// Sort by date
+				this.articleList = this.articleList.sort((a, b) => b.date - a.date);
 
 				for(let [i, article] of this.articleList.entries()){
 					this._appendArticle(article, i);
 				}
 
-				// Select first article
 				if(this.compact === false){
+					// Select first article
 					if(this.currentArticleIndex === null)
 						this._selectArticle(0);
 				}
 
 				this.loaded = true;
-				this.body.find(".reader-bottom-loader").show();
+				this.body.find(".feed-reader-bottom-loader").show();
 			});
 	}
 
@@ -434,8 +372,6 @@ export class Reader {
 
 		// Set separated pane article content on large reader
 		if(this.compact === false){
-			const articlePane = this.body.find(".reader-pane-article");
-
 			// Setup article display on selection
 			const reader = this;
 			articleDOM.bind("click", () => {
@@ -443,8 +379,7 @@ export class Reader {
 				return false;
 			});
 		}
-
-		this.body.find(".article-list").append(articleDOM);
+		this.body.find(".feed-reader-article-list").append(articleDOM);
 	}
 
 	// Triggered by clicking on an article on the large reader
@@ -464,16 +399,15 @@ export class Reader {
 		}
 
 		this.currentArticleIndex = articleIndex;
-		this.currentArticleNode = this.body.find(".article-list > [data-article-index="+articleIndex+"]");
+		this.currentArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
 
 		this.currentArticleNode.addClass("active");
-		this._setArticleDOMContent(
-			this.articleList[articleIndex],
-			this.body.find(".reader-pane-article"));
+		this.articleReader.setContent(this.articleList[articleIndex]);
 
 		// Previous / next buttons disabling
-		this.body.find(".previous-article").toggleClass("disabled", this.currentArticleIndex <= 0);
-		this.body.find(".next-article").toggleClass("disabled", this.currentArticleIndex >= this.articleList.length - 1);
+		this.articleReader.setPrevNextEnabled(
+			this.currentArticleIndex > 0,
+			this.currentArticleIndex < this.articleList.length - 1);
 	}
 
 

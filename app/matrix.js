@@ -24,6 +24,7 @@ import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
 
 import * as sidebarPage from "./pages/sidebar";
+import {Article} from "./informo";
 
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
 const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, "");
@@ -239,7 +240,7 @@ function _loadInformo() {
 
 }
 
-/// Return a promise that resolves into a list of articles
+/// Return a promise that resolves into a Article[]
 /// sourceClassNames: List of source class names that will be fetched. Set ["*"] to fetch all informo official sources
 export function getNews(sourceClassNames, resetPos = false) {
 	console.assert(sourceClassNames.constructor === Array);
@@ -329,11 +330,11 @@ export function getNews(sourceClassNames, resetPos = false) {
 							+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
 							+ "/" + thumbnailParts.mediaID;
 					}
-					updatedNews.push(n);
+					updatedNews.push(Article.fromEvent(n));
 				}
 
 				resolve(updatedNews);
-			});
+			})
 
 
 	});
@@ -348,6 +349,7 @@ function getPartsFromMXCURL(mxcURL) {
 }
 
 
+/// Returns an Article object using the data contained in the given eventID
 export function getSingleArticle(eventID) {
 	let matrixClient = null;
 
@@ -355,5 +357,8 @@ export function getSingleArticle(eventID) {
 		.then((client) => {
 			matrixClient = client;
 			return matrixClient.getMessage(storage.roomID, eventID);
+		})
+		.then((event) => {
+			return Article.fromEvent(event);
 		});
 }

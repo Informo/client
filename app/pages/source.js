@@ -19,7 +19,7 @@ import Router from "../router";
 import Sources from "../sources";
 import {newsEventPrefix} from "../const";
 import * as matrix from "../matrix";
-import {Reader} from "./fragments/reader";
+import {FeedReader} from "./fragments/feed-reader";
 import $ from "jquery";
 
 let reader = null;
@@ -28,7 +28,7 @@ let sourceClassName = null;
 export function init(){
 
 	if(reader === null){
-		reader = new Reader($("#page-source .reader"), true);
+		reader = new FeedReader($("#page-source .feed-reader"), true);
 	}
 	else
 		reader.reset();
