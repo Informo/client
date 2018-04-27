@@ -459,13 +459,15 @@ export class FeedReader {
 		targetDOM.find(".informo-article-date").text(getTimeAgoString(dateDiff) + " ago");
 
 		// Link to this article on informo
-		targetDOM.find("a.informo-article-anchor").attr("href", "#"); //TODO
+		targetDOM.find("a.informo-article-anchor").attr("href", "#/article/"+encodeURI(articleData.id));
 
 		//Unread marker
 		if(this.compact === true){
 			// TODO
 		}
 		else{
+			targetDOM.attr("href", "#/article/"+encodeURI(articleData.id));
+
 			targetDOM.find(">i").text(articleData.unread ? "label" : "label_outline");
 			if(articleData.unread === true)
 				targetDOM.addClass("unread");

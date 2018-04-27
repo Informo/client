@@ -163,7 +163,7 @@ export class ArticleReader {
 		this.body.find(".informo-article-date").text(getTimeAgoString(dateDiff) + " ago");
 
 		// Link to this article on informo
-		this.body.find("a.informo-article-anchor").attr("href", "#"); //TODO
+		this.body.find("a.informo-article-anchor").attr("href", "#/article/"+encodeURI(article.id));
 
 		//Unread marker
 		if(this.compact === true){
