@@ -24,7 +24,7 @@ import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
 
 import * as sidebarPage from "./pages/sidebar";
-import {Article} from "./informo";
+import {Article} from "./article";
 
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
 const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, "");

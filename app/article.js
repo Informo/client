@@ -14,11 +14,13 @@
 // limitations under the License.
 
 
-import informoSources from "./sources"
+import informoSources from "./sources";
+import database from "./database";
+
 
 export class Article {
 
-	constructor(id, title, description, author, image, sourceName, date, content, externalLink, unread = false, allowed = true){
+	constructor(id, title, description, author, image, sourceName, date, content, externalLink, allowed = true){
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -28,8 +30,9 @@ export class Article {
 		this.date = date;
 		this.content = content;
 		this.externalLink = externalLink;
-		this.unread = unread;
 		this.allowed = allowed;
+
+		this._isRead = null;
 	}
 
 	static fromEvent(eventData){
@@ -43,14 +46,27 @@ export class Article {
 			eventData.content.date,
 			eventData.content.content,
 			eventData.content.link,
-
-			Math.floor(Math.random() * 2) == 0,//TODO: handle unread status
 			informoSources.canPublish(eventData.sender, eventData.type)
 		);
 	}
 
+	/// Promise that returns the article read status (insta resolve if already queried)
+	isRead(){
+		return new Promise((resolve) => {
+			if(this._isRead !== null)
+				resolve(this._isRead);
+			else{
+				database.getArticleRead(this.id)
+					.then((isRead) => {
+						this._isRead = isRead;
+						resolve(this._isRead);
+					});
+			}
+		});
+	}
+
 	setRead(read = true){
 		this.unread = read !== true;
-		//TODO: store in DB
+		database.setArticleRead(this.id, read);
 	}
 }

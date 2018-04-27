@@ -389,20 +389,23 @@ export class FeedReader {
 		if(articleIndex >= this.articleList.length || articleIndex < 0)
 			return;
 
+		// Deactivate previous article
 		if(this.currentArticleIndex !== null){
-			// TODO: mark this.currentArticleEventID as read if !== null and make it persistent
-			this.articleList[this.currentArticleIndex].unread = false;
-			this.currentArticleNode.removeClass("unread");
-			this.currentArticleNode.find(">i").text("label_outline");
-
 			this.currentArticleNode.removeClass("active");
 		}
 
+		// Set new current article
 		this.currentArticleIndex = articleIndex;
 		this.currentArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
 
+		// Mark article active in list
 		this.currentArticleNode.addClass("active");
 		this.articleReader.setContent(this.articleList[articleIndex]);
+
+		// Read status
+		this.articleList[this.currentArticleIndex].setRead(true);
+		this.currentArticleNode.removeClass("unread");
+		this.currentArticleNode.find(">i").text("label_outline");
 
 		// Previous / next buttons disabling
 		this.articleReader.setPrevNextEnabled(
@@ -411,7 +414,7 @@ export class FeedReader {
 	}
 
 
-	_setArticleDOMContent(articleData, targetDOM){
+	_setArticleDOMContent(article, targetDOM){
 		function getTimeAgoString(dateDiff){
 			const seconds = dateDiff / 1000;
 			var interval = Math.floor(seconds / 31536000);
@@ -438,44 +441,48 @@ export class FeedReader {
 		}
 
 		// Title
-		targetDOM.find(".informo-article-title").text(articleData.title);
+		targetDOM.find(".informo-article-title").text(article.title);
 		// Image
-		if(articleData.image && articleData.image !== null)
+		if(article.image && article.image !== null)
 			targetDOM.addClass("with-img");
 		targetDOM.find(".informo-article-image img, img.informo-article-image")
-			.attr("src", articleData.image);
+			.attr("src", article.image);
 		// Author
-		if (articleData.author) {
-			targetDOM.find(".informo-article-author").text(articleData.author);
+		if (article.author) {
+			targetDOM.find(".informo-article-author").text(article.author);
 		} else {
 			targetDOM.find(".informo-article-author").remove();
 		}
 		// Source
-		targetDOM.find("a.informo-article-source").attr("href", articleData.externalLink);
-		targetDOM.find(":not(a).informo-article-source").text(articleData.sourceName);
+		targetDOM.find("a.informo-article-source").attr("href", article.externalLink);
+		targetDOM.find(":not(a).informo-article-source").text(article.sourceName);
 		// Date
-		const date = new Date(articleData.date * 1000);
+		const date = new Date(article.date * 1000);
 		const dateDiff = new Date() - date;
 		targetDOM.find(".informo-article-date").text(getTimeAgoString(dateDiff) + " ago");
 
 		// Link to this article on informo
-		targetDOM.find("a.informo-article-anchor").attr("href", "#/article/"+encodeURI(articleData.id));
+		targetDOM.find("a.informo-article-anchor").attr("href", "#/article/"+encodeURI(article.id));
 
-		//Unread marker
 		if(this.compact === true){
-			// TODO
+			// TODO: unread marker
 		}
 		else{
-			targetDOM.attr("href", "#/article/"+encodeURI(articleData.id));
+			targetDOM.attr("href", "#/article/"+encodeURI(article.id));
 
-			targetDOM.find(">i").text(articleData.unread ? "label" : "label_outline");
-			if(articleData.unread === true)
-				targetDOM.addClass("unread");
+			//Unread marker
+			article.isRead()
+				.then((isRead) => {
+					targetDOM.find(">i").text(isRead ? "label_outline" : "label");
+					if(isRead === false)
+						targetDOM.addClass("unread");
+				});
+
 		}
 
 		// Article content
-		setSanitizedHtmlContent(targetDOM.find(".informo-article-intro"), articleData.description);
-		setSanitizedHtmlContent(targetDOM.find(".informo-article-content"), articleData.content);
+		setSanitizedHtmlContent(targetDOM.find(".informo-article-intro"), article.description);
+		setSanitizedHtmlContent(targetDOM.find(".informo-article-content"), article.content);
 	}
 }
 
