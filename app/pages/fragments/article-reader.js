@@ -31,9 +31,28 @@ const template = $(`
 						<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
 					</a>
 					<ul class="right">
-						<li><a href="#"><i class="material-icons">markunread</i></a></li>
-						<li><a href="#"><i class="material-icons">bookmark</i></a></li>
-						<li><a href="#"><i class="material-icons">share</i></a></li>
+						<li><a class="markunread-button" href="#"><i class="material-icons">markunread</i></a></li>
+						<li><a class="bookmark-button" href="#"><i class="material-icons">bookmark</i></a></li>
+						<li>
+							<a class="share-button" href="#"><i class="material-icons">share</i></a>
+							<ul class="share-button-dropdown dropdown-content">
+								<li class="link-single-article line-link">
+									<span>Single article</span>
+									<input value="">
+									<a class="copy-button btn-floating waves-effect waves-light"><i class="material-icons">content_copy</i></a>
+								</li>
+								<li class="link-feed line-link">
+									<span>Article in feed</span>
+									<input value="">
+									<a class="copy-button btn-floating waves-effect waves-light"><i class="material-icons">content_copy</i></a>
+								</li>
+								<li class="link-informo-path line-link">
+									<span>Informo path</span>
+									<input value="">
+									<a class="copy-button btn-floating waves-effect waves-light"><i class="material-icons">content_copy</i></a>
+								</li>
+							</ul>
+						</li>
 					</ul>
 				</div>
 			</nav>
@@ -82,9 +101,12 @@ const template = $(`
 	</div>`);
 
 
+let uid = 0;
 
 export class ArticleReader {
 
+	/// container: JQuery object where HTML will be injected
+	///
 	constructor(container, showPrevNextButtons, showLoader = true, fixedTopBar = false) {
 		this.body = template.clone();
 
@@ -102,15 +124,55 @@ export class ArticleReader {
 
 		this.body.find(".article-reader-loader").toggle(showLoader);
 
+		// Fixed toolbar setup
 		if(fixedTopBar === true){
 			this.body.find(".navbar").addClass("navbar-fixed");
 		}
 
+		// Share button
+		this.body.find(".share-button-dropdown").attr("id", "reader-share-dropdown-"+uid);
+		this.body.find(".share-button").attr("data-activates", "reader-share-dropdown-"+uid);
+		uid++;
+
+		this._setControls(false);
 
 		container.append(this.body);
+
+		this.body.find(".share-button").bind("click", (ev) => {
+			if($(ev.currentTarget).hasClass("disabled")){
+				// Ugly hack: if button is active it the dropdown will try to close
+				// itself instead of opening.
+				// Closing while already closed does not appear to have side effects
+				$(ev.currentTarget).addClass("active");
+			}
+		});
+		this.body.find(".share-button").dropdown({
+			inDuration: 300,
+			outDuration: 225,
+			constrainWidth: false,
+			hover: false,
+			gutter: 0,
+			belowOrigin: false,
+			alignment: "right",
+			stopPropagation: true,
+		});
+
+		this.body.find(".share-button-dropdown .copy-button").bind("click", (ev) => {
+			const field = $(ev.currentTarget.parentNode).find("input");
+			field.focus();
+			field.select();
+			document.execCommand("copy");
+		});
+	}
+
+	_setControls(enabled){
+		this.body.find(".markunread-button").toggleClass("disabled", enabled === false);
+		this.body.find(".bookmark-button").toggleClass("disabled", enabled === false);
+		this.body.find(".share-button").toggleClass("disabled", enabled === false);
 	}
 
 
+	/// Fills the reader with the given Article object
 	setContent(article){
 		this.body.find(".article-reader-loader").hide();
 		this.body.find(".article-reader-loaded").show();
@@ -181,8 +243,28 @@ export class ArticleReader {
 		// Article content
 		setSanitizedHtmlContent(this.body.find(".informo-article-intro"), article.description);
 		setSanitizedHtmlContent(this.body.find(".informo-article-content"), article.content);
+
+
+
+		// Share button
+		const singleArticle = this.body.find(".link-single-article");
+		const singleArticleUrl = singleArticle.find("input");
+		singleArticleUrl.attr("value", window.location.origin + "#/article/" + encodeURI(article.id));
+
+		const feedArticle = this.body.find(".link-feed");
+		const feedArticleUrl = feedArticle.find("input");
+		feedArticleUrl.attr("value", "TODO");
+
+		const informoArticle = this.body.find(".link-informo-path");
+		const informoArticleUrl = informoArticle.find("input");
+		informoArticleUrl.attr("value", "#/article/" + encodeURI(article.id));
+
+
+		// Enable controls
+		this._setControls(true);
 	}
 
+	/// Fills the content of the reader by fetching a specific article on Informo
 	fetchContent(eventID){
 		this.body.find(".article-reader-loaded").hide();
 		this.body.find(".article-reader-loader").show();
@@ -200,7 +282,7 @@ export class ArticleReader {
 			});
 	}
 
-
+	/// Set to true to enable/disable previous and next buttons
 	setPrevNextEnabled(previousEnabled, nextEnabled){
 		this.previousButton.toggleClass("disabled", previousEnabled === false);
 		this.nextButton.toggleClass("disabled", nextEnabled === false);

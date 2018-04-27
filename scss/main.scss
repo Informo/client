@@ -199,3 +199,8 @@ nav {
 	transition-property: background-color;
 	transition-duration: 1s;
 }
+
+
+nav .nav-wrapper > ul > li > a.disabled {
+	color: rgba(255,255,255,0.3);
+}
