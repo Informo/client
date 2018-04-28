@@ -84,6 +84,7 @@ export function init(){
 
 							addButton.addClass("disabled");
 						}
+						return false;
 					});
 
 					card.find(".view-button").attr("href", "#/source/"+encodeURI(sourceName));
