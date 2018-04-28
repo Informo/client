@@ -87,7 +87,7 @@ const template = [
 				<span class="informo-article-title title flow-text"></span>
 				<div class="informo-article-intro truncate"></div>
 				<div>
-					<span class="informo-article-author"></span>
+					<span class="informo-article-author"></span><br class="if-has-author"/>
 					<span class="informo-article-source"></span>
 					<span class="right informo-article-date"></span>
 				</div>
@@ -178,12 +178,9 @@ export class FeedReader {
 		this.scrollListener = null;
 
 		this.body = template[this.compact === true ? 1 : 0].body.clone();
+		this.articleReader = null;
 
 		this.reset();
-
-		// Show loader & hide content
-		this.body.find(".feed-reader-loader").show();
-		this.body.find(".feed-reader-loaded-content").hide();
 
 		// Populate body
 		container.append(this.body);
@@ -202,23 +199,34 @@ export class FeedReader {
 			this.body.height($(window).height() - this.body.position().top);
 
 			this.articleReader.previousButton.bind("click", () => {
-				if(this.currentArticleIndex !== null){
-					this._selectArticle(this.currentArticleIndex - 1);
+				if(this.activeArticleIndex !== null){
+					this._selectArticle(this.activeArticleIndex - 1);
 					//TODO: scroll to show selected article
 				}
 				return false;
 			});
 			this.articleReader.nextButton.bind("click", () => {
-				if(this.currentArticleIndex !== null){
-					this._selectArticle(this.currentArticleIndex + 1);
+				if(this.activeArticleIndex !== null){
+					this._selectArticle(this.activeArticleIndex + 1);
 					//TODO: scroll to show selected article
 				}
 				return false;
 			});
+
+			// Callback when the article is changed from the reader
+			this.articleReader.onArticleChange = (article) => {
+				this._setReadMarker(this.activeArticleNode, article.unread === false);
+			};
 		}
 	}
 	/// Remove all feeds
 	reset(){
+		// Show loader & hide content
+		this.body.find(".feed-reader-loader").show();
+		this.body.find(".feed-reader-loaded-content").hide();
+		if(this.articleReader !== null)
+			this.articleReader.setContent(null);
+
 		this.articleList = [];
 
 		this.loaded = false;
@@ -228,8 +236,8 @@ export class FeedReader {
 		this.showUnreadOnly = false;
 
 		// Only used for large view
-		this.currentArticleIndex = null;
-		this.currentArticleNode = null;
+		this.activeArticleIndex = null;
+		this.activeArticleNode = null;
 
 		// Empty article list
 		this.body.find(".feed-reader-article-list .informo-article").remove();
@@ -343,7 +351,7 @@ export class FeedReader {
 
 				if(this.compact === false){
 					// Select first article
-					if(this.currentArticleIndex === null)
+					if(this.activeArticleIndex === null)
 						this._selectArticle(0);
 				}
 
@@ -390,27 +398,27 @@ export class FeedReader {
 			return;
 
 		// Deactivate previous article
-		if(this.currentArticleIndex !== null){
-			this.currentArticleNode.removeClass("active");
+		if(this.activeArticleIndex !== null){
+			this.activeArticleNode.removeClass("active");
 		}
 
 		// Set new current article
-		this.currentArticleIndex = articleIndex;
-		this.currentArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
+		this.activeArticleIndex = articleIndex;
+		this.activeArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
 
 		// Mark article active in list
-		this.currentArticleNode.addClass("active");
+		this.activeArticleNode.addClass("active");
 		this.articleReader.setContent(this.articleList[articleIndex]);
 
 		// Read status
-		this.articleList[this.currentArticleIndex].setRead(true);
-		this.currentArticleNode.removeClass("unread");
-		this.currentArticleNode.find(">i").text("label_outline");
+		this.articleList[this.activeArticleIndex].setRead(true);
+		this.activeArticleNode.removeClass("unread");
+		this.activeArticleNode.find(">i").text("label_outline");
 
 		// Previous / next buttons disabling
 		this.articleReader.setPrevNextEnabled(
-			this.currentArticleIndex > 0,
-			this.currentArticleIndex < this.articleList.length - 1);
+			this.activeArticleIndex > 0,
+			this.activeArticleIndex < this.articleList.length - 1);
 	}
 
 
@@ -452,6 +460,7 @@ export class FeedReader {
 			targetDOM.find(".informo-article-author").text(article.author);
 		} else {
 			targetDOM.find(".informo-article-author").remove();
+			targetDOM.find(".if-has-author").remove();
 		}
 		// Source
 		targetDOM.find("a.informo-article-source").attr("href", article.externalLink);
@@ -473,9 +482,7 @@ export class FeedReader {
 			//Unread marker
 			article.isRead()
 				.then((isRead) => {
-					targetDOM.find(">i").text(isRead ? "label_outline" : "label");
-					if(isRead === false)
-						targetDOM.addClass("unread");
+					this._setReadMarker(targetDOM, isRead);
 				});
 
 		}
@@ -483,6 +490,12 @@ export class FeedReader {
 		// Article content
 		setSanitizedHtmlContent(targetDOM.find(".informo-article-intro"), article.description);
 		setSanitizedHtmlContent(targetDOM.find(".informo-article-content"), article.content);
+	}
+
+
+	_setReadMarker(articleDOM, isRead){
+		articleDOM.find(">i").text(isRead ? "label_outline" : "label");
+		articleDOM.toggleClass("unread", isRead === false);
 	}
 }
 

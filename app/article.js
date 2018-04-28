@@ -66,7 +66,7 @@ export class Article {
 	}
 
 	setRead(read = true){
-		this.unread = read !== true;
+		this._isRead = read;
 		database.setArticleRead(this.id, read);
 	}
 }

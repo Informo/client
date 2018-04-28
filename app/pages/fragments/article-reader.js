@@ -109,6 +109,8 @@ export class ArticleReader {
 	///
 	constructor(container, showPrevNextButtons, showLoader = true, fixedTopBar = false) {
 		this.body = template.clone();
+		this.currentArticle = null;
+		this.onArticleChange = null;
 
 		// Previous / Next buttons
 		this.previousButton = this.body.find(".previous-article");
@@ -119,10 +121,11 @@ export class ArticleReader {
 			this.nextButton.hide();
 		}
 
-		// Hide article empty content
-		this.body.find(".article-reader-loaded").hide();
 
-		this.body.find(".article-reader-loader").toggle(showLoader);
+		// Hide article empty content
+		this.showLoader = showLoader;
+		this.body.find(".article-reader-loaded").hide();
+		this.body.find(".article-reader-loader").toggle(this.showLoader);
 
 		// Fixed toolbar setup
 		if(fixedTopBar === true){
@@ -138,8 +141,21 @@ export class ArticleReader {
 
 		container.append(this.body);
 
+
+		// Mark unread button
+		this.body.find(".markunread-button").bind("click", (ev) => {
+			if($(ev.currentTarget).hasClass("disabled") === false && this.currentArticle !== null){
+				this.currentArticle.setRead(false);
+				if(this.onArticleChange !== null)
+					this.onArticleChange(this.currentArticle);
+			}
+			return false;
+		});
+
+
+		// Share buttons
 		this.body.find(".share-button").bind("click", (ev) => {
-			if($(ev.currentTarget).hasClass("disabled")){
+			if($(ev.currentTarget).hasClass("disabled") && this.currentArticle !== null){
 				// Ugly hack: if button is active it the dropdown will try to close
 				// itself instead of opening.
 				// Closing while already closed does not appear to have side effects
@@ -174,6 +190,14 @@ export class ArticleReader {
 
 	/// Fills the reader with the given Article object
 	setContent(article){
+		this.currentArticle = article;
+
+		if(article === null){
+			this.body.find(".article-reader-loader").toggle(this.showLoader);
+			this.body.find(".article-reader-loaded").hide();
+			return;
+		}
+
 		this.body.find(".article-reader-loader").hide();
 		this.body.find(".article-reader-loaded").show();
 
@@ -228,14 +252,7 @@ export class ArticleReader {
 		this.body.find("a.informo-article-anchor").attr("href", "#/article/"+encodeURI(article.id));
 
 		//Unread marker
-		if(this.compact === true){
-			// TODO
-		}
-		else{
-			this.body.find(">i").text(article.unread ? "label" : "label_outline");
-			if(article.unread === true)
-				this.body.addClass("unread");
-		}
+		// TODO ?
 
 		this.body.find(".article-title-bar").toggleClass("orange", article.allowed === false);
 		this.body.find(".article-title-bar").toggleClass("grey", article.allowed === true);
