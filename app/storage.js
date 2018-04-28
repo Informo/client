@@ -15,23 +15,23 @@
 
 class Storage {
 	constructor(){
-		this.homeserverURL    = this._getLocalStorage("homeserverURL");
-		this.accessToken      = this._getLocalStorage("accessToken");
-		this.userID           = this._getLocalStorage("userID");
-		this.deviceID         = this._getLocalStorage("deviceID");
-		this.roomAlias        = this._getLocalStorage("roomAlias");
-		this.roomID           = this._getLocalStorage("roomID");
-		this.userSources      = JSON.parse(this._getLocalStorage("userSources", "[]"));
+		this.homeserverURL    = this._getLocalStorage("matrix.homeserverURL");
+		this.accessToken      = this._getLocalStorage("matrix.accessToken");
+		this.userID           = this._getLocalStorage("matrix.userID");
+		this.deviceID         = this._getLocalStorage("matrix.deviceID");
+		this.roomAlias        = this._getLocalStorage("matrix.roomAlias");
+		this.roomID           = this._getLocalStorage("matrix.roomID");
+		this.userSources      = JSON.parse(this._getLocalStorage("user.sources", "[]"));
 	}
 
 	save(){
-		window.localStorage.setItem("homeserverURL", this.homeserverURL);
-		window.localStorage.setItem("accessToken", this.accessToken);
-		window.localStorage.setItem("userID", this.userID);
-		window.localStorage.setItem("deviceID", this.deviceID);
-		window.localStorage.setItem("roomAlias", this.roomAlias);
-		window.localStorage.setItem("roomID", this.roomID);
-		window.localStorage.setItem("userSources", JSON.stringify(this.userSources));
+		window.localStorage.setItem("matrix.homeserverURL", this.homeserverURL);
+		window.localStorage.setItem("matrix.accessToken", this.accessToken);
+		window.localStorage.setItem("matrix.userID", this.userID);
+		window.localStorage.setItem("matrix.deviceID", this.deviceID);
+		window.localStorage.setItem("matrix.roomAlias", this.roomAlias);
+		window.localStorage.setItem("matrix.roomID", this.roomID);
+		window.localStorage.setItem("user.sources", JSON.stringify(this.userSources));
 	}
 
 	_getLocalStorage(name, defaultValue = null){
