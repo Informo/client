@@ -313,7 +313,8 @@ export function getNews(sourceClassNames, resetPos = false) {
 				return Promise.all(p);
 			})
 			.then((news) => {
-				let updatedNews = [];
+				let promises = [];
+
 				for (let n of news) {
 					n.thumbnail = null;
 					let medias = n.content.content.match(mxcURLRegexpGen);
@@ -330,11 +331,12 @@ export function getNews(sourceClassNames, resetPos = false) {
 							+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
 							+ "/" + thumbnailParts.mediaID;
 					}
-					updatedNews.push(Article.fromEvent(n));
+
+					promises.push(Article.fromEvent(n));
 				}
 
-				resolve(updatedNews);
-			})
+				resolve(Promise.all(promises));
+			});
 
 
 	});

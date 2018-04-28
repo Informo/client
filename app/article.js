@@ -32,41 +32,41 @@ export class Article {
 		this.externalLink = externalLink;
 		this.allowed = allowed;
 
-		this._isRead = null;
+		this.unread = null;
 	}
 
+	/// Returns a promise that resolves into an article
 	static fromEvent(eventData){
-		return new Article(
-			eventData.event_id,
-			eventData.content.headline,
-			eventData.content.description,
-			eventData.content.author,
-			eventData.content.thumbnail,
-			informoSources.sources[eventData.type].name,
-			eventData.content.date,
-			eventData.content.content,
-			eventData.content.link,
-			informoSources.canPublish(eventData.sender, eventData.type)
-		);
-	}
+		return new Promise((resolve, reject) => {
+			const article = new Article(
+				eventData.event_id,
+				eventData.content.headline,
+				eventData.content.description,
+				eventData.content.author,
+				eventData.content.thumbnail,
+				informoSources.sources[eventData.type].name,
+				eventData.content.date,
+				eventData.content.content,
+				eventData.content.link,
+				informoSources.canPublish(eventData.sender, eventData.type)
+			);
 
-	/// Promise that returns the article read status (insta resolve if already queried)
-	isRead(){
-		return new Promise((resolve) => {
-			if(this._isRead !== null)
-				resolve(this._isRead);
-			else{
-				database.getArticleRead(this.id)
-					.then((isRead) => {
-						this._isRead = isRead;
-						resolve(this._isRead);
-					});
-			}
+			// Get read status
+			database.getArticleRead(article.id)
+				.then((isRead) => {
+					article.unread = isRead === false;
+					resolve(article);
+				},
+				(err) => {
+					console.error("Cannot get article", article.id, "read status:", err);
+					reject(err);
+				});
 		});
-	}
 
+	}
 	setRead(read = true){
 		this._isRead = read;
 		database.setArticleRead(this.id, read);
 	}
+
 }

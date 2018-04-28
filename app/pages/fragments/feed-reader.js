@@ -38,7 +38,7 @@ const template = [
 							<ul class="right">
 								<li>
 									<div class="switch">
-										<label>Unread <input type="checkbox"><span class="lever"></span> All</label>
+										<label>Unread <input class="filter-unread-checkbox" type="checkbox"><span class="lever"></span> All</label>
 									</div>
 								</li>
 								<li><a href="#"><i class="material-icons">settings</i></a></li>
@@ -176,6 +176,7 @@ export class FeedReader {
 
 		this.id = readerId++;
 		this.scrollListener = null;
+		this.filterUnreadOnly = this.filterUnreadOnly === undefined ? true : this.filterUnreadOnly;// TODO: Get value from persistent storage
 
 		this.body = template[this.compact === true ? 1 : 0].body.clone();
 		this.articleReader = null;
@@ -217,6 +218,14 @@ export class FeedReader {
 			this.articleReader.onArticleChange = (article) => {
 				this._setReadMarker(this.activeArticleNode, article.unread === false);
 			};
+
+			// Filter unread switch
+			this.body.find(".filter-unread-checkbox").bind("change", (ev) => {
+				this.filterUnreadOnly = ev.currentTarget.checked === false;
+				const sourceClassNames = this.sourceClassNames;
+				this.reset();
+				this.setFeed(sourceClassNames);
+			});
 		}
 	}
 	/// Remove all feeds
@@ -233,7 +242,6 @@ export class FeedReader {
 		this.isLoadingBottom = false;
 		this.noMorePosts = false;
 		this.sourceClassNames = null;
-		this.showUnreadOnly = false;
 
 		// Only used for large view
 		this.activeArticleIndex = null;
@@ -247,11 +255,6 @@ export class FeedReader {
 		if(this.scrollListener !== null){
 			$(window).unbind("scroll.readerBottomLoad");
 		}
-	}
-
-	/// If called, this reader will only show unread feeds. Call this.reset() to undo.
-	setOnlyUnread(){
-		this.showUnreadOnly = true;
 	}
 
 	setFeedNames(sourceNames){
@@ -342,6 +345,11 @@ export class FeedReader {
 				// Remove non allowed content
 				this.articleList = news.filter((a) => a.allowed === true);
 
+				// If filtered
+				if(this.filterUnreadOnly === true){
+					this.articleList = news.filter((a) => a.unread === true);
+				}
+
 				// Sort by date
 				this.articleList = this.articleList.sort((a, b) => b.date - a.date);
 
@@ -406,14 +414,14 @@ export class FeedReader {
 		this.activeArticleIndex = articleIndex;
 		this.activeArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
 
-		// Mark article active in list
-		this.activeArticleNode.addClass("active");
-		this.articleReader.setContent(this.articleList[articleIndex]);
-
-		// Read status
+		// Update read status
 		this.articleList[this.activeArticleIndex].setRead(true);
 		this.activeArticleNode.removeClass("unread");
 		this.activeArticleNode.find(">i").text("label_outline");
+
+		// Mark article active in list
+		this.activeArticleNode.addClass("active");
+		this.articleReader.setContent(this.articleList[articleIndex]);
 
 		// Previous / next buttons disabling
 		this.articleReader.setPrevNextEnabled(
@@ -473,17 +481,13 @@ export class FeedReader {
 		// Link to this article on informo
 		targetDOM.find("a.informo-article-anchor").attr("href", "#/article/"+encodeURI(article.id));
 
+		// Unread marker
 		if(this.compact === true){
 			// TODO: unread marker
 		}
 		else{
 			targetDOM.attr("href", "#/article/"+encodeURI(article.id));
-
-			//Unread marker
-			article.isRead()
-				.then((isRead) => {
-					this._setReadMarker(targetDOM, isRead);
-				});
+			this._setReadMarker(targetDOM, article.unread === false);
 
 		}
 

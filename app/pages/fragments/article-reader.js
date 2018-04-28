@@ -145,6 +145,7 @@ export class ArticleReader {
 		// Mark unread button
 		this.body.find(".markunread-button").bind("click", (ev) => {
 			if($(ev.currentTarget).hasClass("disabled") === false && this.currentArticle !== null){
+				// TODO: markunread-button should behave like a switch
 				this.currentArticle.setRead(false);
 				if(this.onArticleChange !== null)
 					this.onArticleChange(this.currentArticle);
