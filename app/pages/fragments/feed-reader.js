@@ -391,8 +391,11 @@ export class FeedReader {
 
 				if(this.compact === false){
 					// Select first article
-					if(this.activeArticleIndex === null)
+					if(this.activeArticleIndex === null && this.articleList.length > 0)
 						this._selectArticle(0);
+
+					if(this.articleReader !== null && news.length > 0)
+						this.articleReader.setPrevNextEnabled(null, true);
 				}
 
 				this.loaded = true;

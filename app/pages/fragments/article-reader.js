@@ -301,8 +301,11 @@ export class ArticleReader {
 	}
 
 	/// Set to true to enable/disable previous and next buttons
+	/// If null, the button will keep its current state
 	setPrevNextEnabled(previousEnabled, nextEnabled){
-		this.previousButton.toggleClass("disabled", previousEnabled === false);
-		this.nextButton.toggleClass("disabled", nextEnabled === false);
+		if(previousEnabled !== null)
+			this.previousButton.toggleClass("disabled", previousEnabled === false);
+		if(nextEnabled !== null)
+			this.nextButton.toggleClass("disabled", nextEnabled === false);
 	}
 }
