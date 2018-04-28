@@ -29,9 +29,7 @@ import {newsEventPrefix} from "../const";
 let reader = null;
 
 
-export function init(title, type){
-	// TODO: we'll need later a better handling of unread / all selection
-
+export function init(type){
 	$("body > .navbar-fixed").hide();//TODO: will make impossible to open the side nav
 
 	if(reader === null){
@@ -40,25 +38,23 @@ export function init(title, type){
 
 
 	let sources = [];
+	let title;
 
 	switch(type){
 	case "all":
-		sources = storage.userSources;
-		break;
-	case "unread":
-		reader.setOnlyUnread();
+		title = "All your feeds";
 		sources = storage.userSources;
 		break;
 	case "source":{
 		const sourceName = router.getPathParamValue("sourceName");
-		if(title === null){
-			//TODO: will display sourceName if informo not yet connected
-			const source = informoSources.sources[newsEventPrefix + sourceName];
-			if(source)
-				title = "Articles from " + source.name;
-			else
-				title = "Articles from " + sourceName;
-		}
+
+		//TODO: will display sourceName if informo not yet connected
+		const source = informoSources.sources[newsEventPrefix + sourceName];
+		if(source)
+			title = "Articles from " + source.name;
+		else
+			title = "Articles from " + sourceName;
+
 		sources = [sourceName];
 		break;
 	}
