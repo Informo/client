@@ -298,43 +298,57 @@ export class FeedReader {
 
 
 				// Bind bottom scroll
-				const scrollPane = this.compact === true ? $(window) : this.body.find(".reader-pane-list .scrollpane");
+				this.scrollPane = this.compact === true ? $(window) : this.body.find(".reader-pane-list .scrollpane");
 				if(this.scrollListener !== null){
-					scrollPane.unbind("scroll.readerBottomLoad"+this.id.toString);
+					this.scrollPane.unbind("scroll.readerBottomLoad"+this.id.toString);
 				}
-				scrollPane.bind("scroll.readerBottomLoad"+this.id.toString, () => {
-					const loader = this.body.find(".feed-reader-bottom-loader");
-					if(loader.is(":hidden") === true)
-						return;
-
-					let loadBottom = false;
-					if(this.loaded === true && this.isLoadingBottom === false){
-						if(this.compact === true){
-							let loaderPos = loader.position().top;
-							loadBottom = window.scrollY + window.innerHeight >= loaderPos;
-						}
-						else{
-							let loaderPos = loader.position().top - scrollPane.position().top;
-							loadBottom = scrollPane.innerHeight() >= loaderPos;
-						}
-					}
-
-					if(loadBottom === true){
-						if(this.noMorePosts === true){
-							// hide loader
-							loader.hide();
-						}
-						else{
-							this.isLoadingBottom = true;
-							this._appendFeedArticles(false)
-								.then(() => this.isLoadingBottom = false);
-						}
-					}
-
+				this.scrollPane.bind("scroll.readerBottomLoad"+this.id.toString, () => {
+					this._loadMoreArticlesIfNeeded();
 				});
+
+				// This will trigger loading of more articles if the bottom loader already on screen
+				this._loadMoreArticlesIfNeeded();
 			});
 	}
 
+	// Load more articles if bottom loader is visible on screen
+	// Used mainly when scrolling
+	_loadMoreArticlesIfNeeded(){
+		const loader = this.body.find(".feed-reader-bottom-loader");
+		if(loader.is(":hidden") === true)
+			return;
+
+		let loadBottom = false;
+		if(this.loaded === true && this.isLoadingBottom === false){
+			if(this.compact === true){
+				// Scrollpane is the entire window
+				let loaderPos = loader.position().top;
+				loadBottom = window.scrollY + window.innerHeight >= loaderPos;
+			}
+			else{
+				// Scrollpane is .reader-pane-list .scrollpane
+				let loaderPos = loader.position().top - this.scrollPane.position().top;
+				loadBottom = this.scrollPane.innerHeight() >= loaderPos;
+			}
+		}
+
+		if(loadBottom === true){
+			if(this.noMorePosts === true){
+				// hide loader
+				loader.hide();
+			}
+			else{
+				this.isLoadingBottom = true;
+				this._appendFeedArticles(false)
+					.then(() => {
+						this.isLoadingBottom = false;
+						// Calling this function again will allow to add articles until
+						// either noMorePosts === true or the bottom loader becomes invisible
+						this._loadMoreArticlesIfNeeded();
+					});
+			}
+		}
+	}
 
 
 	_appendFeedArticles(resetPos, reportProgress = false) {
