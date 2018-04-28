@@ -38,7 +38,7 @@ const template = [
 							<ul class="right">
 								<li>
 									<div class="switch">
-										<label>Unread <input class="filter-unread-checkbox" type="checkbox"><span class="lever"></span> All</label>
+										<label>All <input class="filter-unread-checkbox" type="checkbox"><span class="lever"></span> Unread</label>
 									</div>
 								</li>
 								<li><a href="#"><i class="material-icons">settings</i></a></li>
@@ -177,7 +177,7 @@ export class FeedReader {
 		this.id = readerId++;
 		this.scrollListener = null;
 		this.articleReader = null;
-		this.filterUnreadOnly = false;
+		this.filterUnreadOnly = true;
 
 		// Copy body
 		this.body = template[this.compact === true ? 1 : 0].body.clone();
@@ -196,11 +196,9 @@ export class FeedReader {
 
 			// Filter unread setup
 			this.filterUnreadOnly = window.localStorage.getItem("prefs.feed-reader.filterunread");
-			if(this.filterUnreadOnly === null)
-				this.filterUnreadOnly = true;
-			else
+			if(this.filterUnreadOnly !== null)
 				this.filterUnreadOnly = JSON.parse(this.filterUnreadOnly);
-			this.body.find(".filter-unread-checkbox").prop("checked", this.filterUnreadOnly === false);
+			this.body.find(".filter-unread-checkbox").prop("checked", this.filterUnreadOnly);
 
 
 
@@ -235,7 +233,7 @@ export class FeedReader {
 
 			// Filter unread switch callback
 			this.body.find(".filter-unread-checkbox").bind("change", (ev) => {
-				this.filterUnreadOnly = ev.currentTarget.checked === false;
+				this.filterUnreadOnly = ev.currentTarget.checked;
 				window.localStorage.setItem("prefs.feed-reader.filterunread", JSON.stringify(this.filterUnreadOnly));
 
 				const sourceClassNames = this.sourceClassNames;
