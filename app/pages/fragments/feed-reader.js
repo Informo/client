@@ -18,7 +18,6 @@
 
 
 import $ from "jquery";
-import informoSources from "../../sources";
 import * as matrix from "../../matrix";
 import {newsEventPrefix} from "../../const";
 
@@ -167,7 +166,7 @@ let readerId = 0;
 
 export class FeedReader {
 	/// container: where necessary HTML will be injected
-	/// compact: true to make
+	/// compact: false for a dual-pane reader, true for an expandable list
 	constructor(container, compact){
 		console.assert(container instanceof $);
 		console.assert(typeof compact === "boolean");
@@ -228,7 +227,7 @@ export class FeedReader {
 
 			// Callback when the article is changed from the reader
 			this.articleReader.onArticleChange = (article) => {
-				this._setReadMarker(this.activeArticleNode, article.unread === false);
+				this._setReadVisualMarker(this.activeArticleNode, article.unread === false);
 			};
 
 			// Filter unread switch callback
@@ -265,12 +264,15 @@ export class FeedReader {
 		this.body.find(".feed-reader-article-list .informo-article").remove();
 	}
 
+	/// Call this when the reader is hidden
 	deactivate(){
+		// TODO: most of the time this is not called. See if it needs a activate() method too
 		if(this.scrollListener !== null){
 			$(window).unbind("scroll.readerBottomLoad");
 		}
 	}
 
+	/// Same as setFeed but with source names (mysource) instead of full source class names (network.informo.news.mysource)
 	setFeedNames(sourceNames){
 		let sourceClassNames = [];
 		for(let sourceName of sourceNames){
@@ -306,7 +308,7 @@ export class FeedReader {
 					this._loadMoreArticlesIfNeeded();
 				});
 
-				// This will trigger loading of more articles if the bottom loader already on screen
+				// This will trigger loading of more articles if the bottom loader is already on screen
 				this._loadMoreArticlesIfNeeded();
 			});
 	}
@@ -350,7 +352,7 @@ export class FeedReader {
 		}
 	}
 
-
+	// Fetch and append articles to the list
 	_appendFeedArticles(resetPos, reportProgress = false) {
 		const loaderText = this.body.find(".feed-reader-loader .text");
 		if(reportProgress === true)
@@ -371,18 +373,20 @@ export class FeedReader {
 				}
 
 				// Remove non allowed content
-				this.articleList = news.filter((a) => a.allowed === true);
+				news = news.filter((a) => a.allowed === true);
 
 				// If filtered
 				if(this.filterUnreadOnly === true){
-					this.articleList = news.filter((a) => a.unread === true);
+					news = news.filter((a) => a.unread === true);
 				}
 
 				// Sort by date
-				this.articleList = this.articleList.sort((a, b) => b.date - a.date);
+				news = news.sort((a, b) => b.date - a.date);
 
-				for(let [i, article] of this.articleList.entries()){
-					this._appendArticle(article, i);
+				const offset = this.articleList.length;
+				for(let [i, article] of news.entries()){
+					this.articleList.push(article);
+					this._appendArticleDOM(article, offset + i);
 				}
 
 				if(this.compact === false){
@@ -396,17 +400,8 @@ export class FeedReader {
 			});
 	}
 
-
-	/// Add a single article to the list.
-	/// title: title of the article
-	/// description: short description / introduction
-	/// author: author name
-	/// image: main image to display (null if none)
-	/// source: article source name
-	/// ts: timestamp the article has been posted
-	/// content: HTML content
-	/// href: original article link (on the news site)
-	_appendArticle(article, articleIndex){
+	// Append an article to the DOM (only visual)
+	_appendArticleDOM(article, articleIndex){
 		let articleDOM = template[this.compact === true ? 1 : 0].article.clone();
 
 		articleDOM.attr("data-article-index", articleIndex);
@@ -424,37 +419,6 @@ export class FeedReader {
 			});
 		}
 		this.body.find(".feed-reader-article-list").append(articleDOM);
-	}
-
-	// Triggered by clicking on an article on the large reader
-	_selectArticle(articleIndex){
-		console.assert(this.compact === false, "_selectArticle called on non compact reader");
-
-		if(articleIndex >= this.articleList.length || articleIndex < 0)
-			return;
-
-		// Deactivate previous article
-		if(this.activeArticleIndex !== null){
-			this.activeArticleNode.removeClass("active");
-		}
-
-		// Set new current article
-		this.activeArticleIndex = articleIndex;
-		this.activeArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
-
-		// Update read status
-		this.articleList[this.activeArticleIndex].setRead(true);
-		this.activeArticleNode.removeClass("unread");
-		this.activeArticleNode.find(">i").text("label_outline");
-
-		// Mark article active in list
-		this.activeArticleNode.addClass("active");
-		this.articleReader.setContent(this.articleList[articleIndex]);
-
-		// Previous / next buttons disabling
-		this.articleReader.setPrevNextEnabled(
-			this.activeArticleIndex > 0,
-			this.activeArticleIndex < this.articleList.length - 1);
 	}
 
 
@@ -515,7 +479,7 @@ export class FeedReader {
 		}
 		else{
 			targetDOM.attr("href", "#/article/"+encodeURI(article.id));
-			this._setReadMarker(targetDOM, article.unread === false);
+			this._setReadVisualMarker(targetDOM, article.unread === false);
 
 		}
 
@@ -525,7 +489,39 @@ export class FeedReader {
 	}
 
 
-	_setReadMarker(articleDOM, isRead){
+	// Triggered by clicking on an article on the large reader
+	_selectArticle(articleIndex){
+		console.assert(this.compact === false, "_selectArticle called on non compact reader");
+
+		if(articleIndex >= this.articleList.length || articleIndex < 0)
+			return;
+
+		// Deactivate previous article
+		if(this.activeArticleIndex !== null){
+			this.activeArticleNode.removeClass("active");
+		}
+
+		// Set new current article
+		this.activeArticleIndex = articleIndex;
+		this.activeArticleNode = this.body.find(".feed-reader-article-list > [data-article-index="+articleIndex+"]");
+
+		// Update read status
+		this.articleList[this.activeArticleIndex].setRead(true);
+		this.activeArticleNode.removeClass("unread");
+		this.activeArticleNode.find(">i").text("label_outline");
+
+		// Mark article active in list
+		this.activeArticleNode.addClass("active");
+		this.articleReader.setContent(this.articleList[articleIndex]);
+
+		// Previous / next buttons disabling
+		this.articleReader.setPrevNextEnabled(
+			this.activeArticleIndex > 0,
+			this.activeArticleIndex < this.articleList.length - 1);
+	}
+
+	// Set the read/unread visual status in the article DOM
+	_setReadVisualMarker(articleDOM, isRead){
 		articleDOM.find(">i").text(isRead ? "label_outline" : "label");
 		articleDOM.toggleClass("unread", isRead === false);
 	}
