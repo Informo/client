@@ -176,20 +176,34 @@ export class FeedReader {
 
 		this.id = readerId++;
 		this.scrollListener = null;
-		this.filterUnreadOnly = this.filterUnreadOnly === undefined ? true : this.filterUnreadOnly;// TODO: Get value from persistent storage
-
-		this.body = template[this.compact === true ? 1 : 0].body.clone();
 		this.articleReader = null;
+		this.filterUnreadOnly = false;
 
+		// Copy body
+		this.body = template[this.compact === true ? 1 : 0].body.clone();
+
+		// Reset component (will change this.body)
 		this.reset();
 
 		// Populate body
 		container.append(this.body);
 
+
 		if(this.compact === true){
 			this.body.find(".feed-reader-article-list").collapsible();
 		}
 		else{
+
+			// Filter unread setup
+			this.filterUnreadOnly = window.localStorage.getItem("prefs.feed-reader.filterunread");
+			if(this.filterUnreadOnly === null)
+				this.filterUnreadOnly = true;
+			else
+				this.filterUnreadOnly = JSON.parse(this.filterUnreadOnly);
+			this.body.find(".filter-unread-checkbox").prop("checked", this.filterUnreadOnly === false);
+
+
+
 			this.articleReader = new ArticleReader(this.body.find(".reader-pane-article"), true, false);
 
 			// TODO: handle unbind
@@ -219,9 +233,11 @@ export class FeedReader {
 				this._setReadMarker(this.activeArticleNode, article.unread === false);
 			};
 
-			// Filter unread switch
+			// Filter unread switch callback
 			this.body.find(".filter-unread-checkbox").bind("change", (ev) => {
 				this.filterUnreadOnly = ev.currentTarget.checked === false;
+				window.localStorage.setItem("prefs.feed-reader.filterunread", JSON.stringify(this.filterUnreadOnly));
+
 				const sourceClassNames = this.sourceClassNames;
 				this.reset();
 				this.setFeed(sourceClassNames);
