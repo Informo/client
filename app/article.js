@@ -21,49 +21,26 @@ import database from "./database";
 export class Article {
 
 	constructor(id, title, description, author, image, sourceName, date, content, externalLink, allowed = true){
-		this.id = id;
-		this.title = title;
-		this.description = description;
-		this.author = author;
-		this.image = image;
-		this.sourceName = sourceName;
-		this.date = date;
-		this.content = content;
-		this.externalLink = externalLink;
-		this.allowed = allowed;
+		function defVal(val, def = null){
+			return (typeof val === "undefined") ? def : val;
+		}
+
+		this.id = defVal(id);
+		this.title = defVal(title);
+		this.description = defVal(description);
+		this.author = defVal(author);
+		this.image = defVal(image);
+		this.sourceName = defVal(sourceName);
+		this.date = defVal(date);
+		this.content = defVal(content);
+		this.externalLink = defVal(externalLink);
+		this.allowed = defVal(allowed);//TODO: never set, unused
 
 		this.unread = null;
+		this.signature = null;
+		this.verified = false;
 	}
 
-	/// Returns a promise that resolves into an article
-	static fromEvent(eventData){
-		return new Promise((resolve, reject) => {
-			const article = new Article(
-				eventData.event_id,
-				eventData.content.headline,
-				eventData.content.description,
-				eventData.content.author,
-				eventData.content.thumbnail,
-				informoSources.sources[eventData.type].name,
-				eventData.content.date,
-				eventData.content.content,
-				eventData.content.link,
-				informoSources.canPublish(eventData.sender, eventData.type)
-			);
-
-			// Get read status
-			database.getArticleRead(article.id)
-				.then((isRead) => {
-					article.unread = isRead === false;
-					resolve(article);
-				},
-				(err) => {
-					console.error("Cannot get article", article.id, "read status:", err);
-					reject(err);
-				});
-		});
-
-	}
 	setRead(read = true){
 		this._isRead = read;
 		database.setArticleRead(this.id, read);

@@ -25,6 +25,7 @@ import * as naclUtil from "tweetnacl-util";
 
 import * as sidebarPage from "./pages/sidebar";
 import {Article} from "./article";
+import database from "./database";
 
 const mxcURLRegexpStr = "mxc://([^/]+)/([^\"'/]+)";
 const mxcURLRegexpLoc = new RegExp(mxcURLRegexpStr, "");
@@ -271,76 +272,40 @@ export function getNews(sourceClassNames, resetPos = false) {
 		}
 	}
 
-	return new Promise((resolve, reject) => {
-		let matrixClient = null;
 
-		getConnectedMatrixClient()
-			.then((client) => {
-				matrixClient = client;
-				return client.getMessages(storage.roomID, filter, 20, resetPos);
-			})
-			.then((news) => {
-				let p = [];
-				for (let i in news) {
-					p.push(
-						new Promise((resolve, reject) => {
-							let sig, key, canonical;
-							try {
-								sig = naclUtil.decodeBase64(news[i].content.signature);
-								key = naclUtil.decodeBase64(informoSources.sources[news[i].type].publicKey);
-								delete(news[i].content.signature);
-								canonical = naclUtil.decodeUTF8(stringify(news[i].content));
-							} catch(e) {
-								resolve(false);
-							}
-							resolve(nacl.sign.detached.verify(canonical, sig, key));
-						})
-							.then((verified) => {
-								// TODO: Work on a proper verification badge, which we can
-								// display (preferably in index.js because it handles
-								// display) based on the news[i].content.verified boolean.
-								news[i].content.verified = verified;
-								if (verified) {
-									news[i].content.headline += " 🗸";
-								} else {
-									news[i].content.headline += " 𐄂";
-								}
-								return news[i];
-							})
-					);
-				}
+	let matrixClient = null;
 
-				return Promise.all(p);
-			})
-			.then((news) => {
-				let promises = [];
-
-				for (let n of news) {
-					n.thumbnail = null;
-					let medias = n.content.content.match(mxcURLRegexpGen);
-					if (medias) {
-						for (let m of medias) {
-							let parts = getPartsFromMXCURL(m);
-							let dlURL = matrixClient.homeserverURL
-								+ "/_matrix/media/r0/download/" + parts.serverName
-								+ "/" + parts.mediaID;
-							n.content.content = n.content.content.replace(m, dlURL);
-						}
-						let thumbnailParts = getPartsFromMXCURL(medias[0]);
-						n.content.thumbnail = matrixClient.homeserverURL
-							+ "/_matrix/media/r0/download/" + thumbnailParts.serverName
-							+ "/" + thumbnailParts.mediaID;
-					}
-
-					promises.push(Article.fromEvent(n));
-				}
-
-				resolve(Promise.all(promises));
-			});
-
-
-	});
+	// TODO: no signature checks nor mxc replacements
+	return getConnectedMatrixClient()
+		.then((client) => {
+			matrixClient = client;
+			return matrixClient.getMessages(storage.roomID, filter, 20, resetPos);
+		})
+		.then((events) => {
+			let promises = [];
+			for(let event of events){
+				promises.push(matrixEventToArticle(event));
+			}
+			return Promise.all(promises);
+		});
 }
+
+/// Returns an Article object using the data contained in the given eventID
+export function getSingleArticle(eventID) {
+	let matrixClient = null;
+
+	// TODO: no signature checks nor mxc replacements
+	return getConnectedMatrixClient()
+		.then((client) => {
+			matrixClient = client;
+			return matrixClient.getMessage(storage.roomID, eventID);
+		})
+		.then((event) => {
+			return matrixEventToArticle(event);
+		});
+}
+
+
 
 function getPartsFromMXCURL(mxcURL) {
 	let parts = mxcURL.match(mxcURLRegexpLoc);
@@ -350,17 +315,70 @@ function getPartsFromMXCURL(mxcURL) {
 	};
 }
 
+function matrixEventToArticle(matrixEvent){
+	return new Promise((resolve, reject) => {
+		let article;
+		getConnectedMatrixClient()
+			.then(() => {
+				article = new Article(
+					matrixEvent.event_id,
+					matrixEvent.content.headline,
+					matrixEvent.content.description,
+					matrixEvent.content.author,
+					matrixEvent.content.thumbnail,
+					informoSources.sources[matrixEvent.type].name,
+					matrixEvent.content.date,
+					matrixEvent.content.content,
+					matrixEvent.content.link,
+					informoSources.canPublish(matrixEvent.sender, matrixEvent.type)
+				);
 
-/// Returns an Article object using the data contained in the given eventID
-export function getSingleArticle(eventID) {
-	let matrixClient = null;
+				return database.getArticleRead(article.id);
+			})
+			.then((isRead) => {
+				article.unread = isRead === false;
 
-	return getConnectedMatrixClient()
-		.then((client) => {
-			matrixClient = client;
-			return matrixClient.getMessage(storage.roomID, eventID);
-		})
-		.then((event) => {
-			return Article.fromEvent(event);
-		});
+				// Verify signature
+				let key, canonical;
+				try {
+					article.signature = naclUtil.decodeBase64(matrixEvent.content.signature);
+					key = naclUtil.decodeBase64(informoSources.sources[matrixEvent.type].publicKey);
+					canonical = naclUtil.decodeUTF8(stringify(matrixEvent.content));
+				} catch(e) {
+					return false;
+				}
+
+				return nacl.sign.detached.verify(canonical, article.signature, key);
+			})
+			.then((signatureOk) => {
+				article.verified = signatureOk;
+
+				// Replace mxc URLs
+				let medias = article.content.match(mxcURLRegexpGen);
+				if (medias) {
+					for (let m of medias) {
+						if(article.image === null){
+							// Set first media as article picture if none
+							article.image = m;
+						}
+
+						let parts = getPartsFromMXCURL(m);
+						let dlURL = mxClient.homeserverURL
+							+ "/_matrix/media/r0/download/" + parts.serverName
+							+ "/" + parts.mediaID;
+						article.content = article.content.replace(m, dlURL);
+					}
+				}
+				if(article.image !== null){
+					// Set / replace article image
+					let imageParts = getPartsFromMXCURL(medias[0]);
+					article.image = mxClient.homeserverURL
+						+ "/_matrix/media/r0/download/" + imageParts.serverName
+						+ "/" + imageParts.mediaID;
+				}
+
+				resolve(article);
+			});
+	});
 }
+
