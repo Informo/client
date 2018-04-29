@@ -23,7 +23,7 @@ const template = $(`
 	<div class="article-reader-fragment">
 		<div class="navbar">
 			<nav>
-				<div class="nav-wrapper z-depth-1">
+				<div class="nav-wrapper">
 					<ul>
 						<li><a href="#"><i class="material-icons">format_size</i></a></li>
 					</ul>
@@ -128,9 +128,10 @@ export class ArticleReader {
 		this.body.find(".article-reader-loader").toggle(this.showLoader);
 
 		// Fixed toolbar setup
-		if(fixedTopBar === true){
+		if(fixedTopBar === true)
 			this.body.find(".navbar").addClass("navbar-fixed");
-		}
+		else
+			this.body.find(".navbar .nav-wrapper").addClass("z-depth-1");
 
 		// Share button
 		this.body.find(".share-button-dropdown").attr("id", "reader-share-dropdown-"+uid);
