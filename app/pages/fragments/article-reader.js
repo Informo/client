@@ -197,6 +197,7 @@ export class ArticleReader {
 		if(article === null){
 			this.body.find(".article-reader-loader").toggle(this.showLoader);
 			this.body.find(".article-reader-loaded").hide();
+			this.setPrevNextEnabled(false, false);
 			return;
 		}
 
