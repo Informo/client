@@ -1,0 +1,236 @@
+<!--
+Copyright 2017 Informo core team <core@informo.network>
+
+Licensed under the GNU Affero General Public License, Version 3.0
+(the "License"); you may not use this file except in compliance with the
+License.
+You may obtain a copy of the License at
+
+    https://www.gnu.org/licenses/agpl-3.0.html
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Informo client</title>
+		<link rel="stylesheet" href="dist/style.css" media="screen,projection">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<link rel="icon" type="image/png" href="static/img/logo-round-colored-256.png"/>
+	</head>
+	<body>
+		<div class="navbar-fixed">
+			<nav class="informo-bg-green">
+				<div class="nav-wrapper">
+					<a class="brand-logo center" href="#">
+						<img src="static/img/logo-round-white-128.png" title="Informo - Making information accessible"/>
+					</a>
+					<ul class="left hide-on-large-only">
+						<li><a id="sidebar-button" href="#" data-activates="sidebar"><i class="material-icons">menu</i></a></li>
+						<li>Feeds list</li>
+					</ul>
+				</div>
+			</nav>
+		</div>
+
+
+		<ul id="sidebar" class="side-nav show-on-medium-and-up">
+			<li class="navbar-header informo-bg-green">
+				<div class="center">
+					<img src="static/img/logo-full-white-128.png">
+				</div>
+				<a class="right no-padding navbar-if-setup" href="#/connect" title="Change Informo entrypoint"><i class="material-icons no-padding white-text" style="margin: 0;">exit_to_app</i></a>
+				<strong>Current endpoint URL</strong><br/>
+				<code class="endpoint-url">Not configured</code>
+			</li>
+
+			<li class="navbar-if-notsetup"><a href="#/connect"><i class="material-icons">error_outline</i>Select a server</a></li>
+
+			<li class="navbar-if-connected"><a href="#/feeds/all"><i class="material-icons">rss_feed</i>All your feeds</a></li>
+			<li class="navbar-if-connected"><div class="divider"></div></li>
+			<li class="sourcelist-load navbar-if-notconnected">
+				<div class="preloader-wrapper small active">
+					<div class="spinner-layer spinner-green-only">
+						<div class="circle-clipper left">
+							<div class="circle"></div>
+						</div><div class="gap-patch">
+							<div class="circle"></div>
+						</div><div class="circle-clipper right">
+							<div class="circle"></div>
+						</div>
+					</div>
+				</div>
+			</li>
+			<li class="sourcelist-placeholder navbar-if-connected">
+				<a href="#/discover">You currently have no feeds<br/>Click here to add some feeds</a>
+			</li>
+			<li class="sourcelist-append navbar-if-connected"></li>
+			<li class="navbar-if-connected"><div class="divider"></div></li>
+			<li class="navbar-if-connected"><a href="#/discover"><i class="material-icons">add_circle_outline</i> More feeds</a></li>
+		</ul>
+
+
+
+		<main id="page-container">
+			<!-- =========================================== -->
+			<div id="page-connect" class="container">
+
+				<form id="form-connect-homeserver">
+					<div class="card informo-bg-green-light center-small">
+						<div class="card-content">
+							<span class="card-title">Homeserver connection</span>
+							<p>
+								<form>
+									<div class="input-field">
+										<div class="material-icons prefix">language</div>
+										<input name="homeserver-url" id="form-connect-homeserver-url" type="url" class="validate">
+										<label for="homeserver-url">Server URL</label>
+									</div>
+									<div class="input-field">
+										<div class="material-icons prefix">home</div>
+										<input name="room-alias" id="form-connect-room-alias" type="text" class="validate">
+										<label for="room-alias">Room alias</label>
+									</div>
+								</form>
+							</p>
+						</div>
+						<div class="card-action">
+
+							<button class="btn waves-effect waves-light" type="submit" name="action">Connect
+								<i class="material-icons right">send</i>
+							</button>
+
+						</div>
+					</div>
+				</form>
+
+
+				<p>
+					TODO<br/>
+					This is a welcome text where we explain our philosophy (matrix server keeps you anonymous, we don't store anything on servers) and very quickly how informo works (with links to more detailed information)<br/>
+					We'll need to explain why users need to chose carefully a entrypoint
+
+					<table class="highlight">
+						<thead>
+							<tr><th>Server URL</th><th>Room</th><th>Location</th><th>Owner</th><th>Additional info.</th></tr>
+						</thead>
+						<tbody id="connect-homeserver-list">
+						</tbody>
+					</table>
+				</p>
+			</div>
+			<!-- =========================================== -->
+			<div id="page-feeds">
+				<div class="feed-reader"></div>
+			</div>
+			<!-- =========================================== -->
+			<div id="page-source" class="container">
+				<div class="content-loader center-align">
+					<div class="preloader-wrapper active">
+						<div class="spinner-layer spinner-green-only">
+							<div class="circle-clipper left">
+								<div class="circle"></div>
+							</div><div class="gap-patch">
+								<div class="circle"></div>
+							</div><div class="circle-clipper right">
+								<div class="circle"></div>
+							</div>
+						</div>
+
+					</div>
+					<div class="loader-text flow-text"></div>
+				</div>
+
+				<div class="content" style="display: none">
+
+					<h1 class="name">
+					</h1>
+
+					<h3>Who are they?</h3>
+					<p class="description"></p>
+
+					<h3>Latest news:</h3>
+
+					<div class="feed-reader"></div>
+				</div>
+			</div>
+			<!-- =========================================== -->
+			<div id="page-discover" class="container">
+
+					<ul class="tabs center">
+						<li class="tab"><a href="#page-discover-official" class="active">Official feeds</a></li>
+						<li class="tab"><a href="#page-discover-unofficial">Unofficial feed</a></li>
+					</ul>
+					<div id="page-discover-official">
+						<h1>Discover new feeds</h1>
+						<p>
+							TODO: explain that the user must select at least one feed, and that those listed here are only the official ones
+						</p>
+						<div class="row">
+							<!-- TODO: make more intuitive that feeds are followed or not -->
+							<div class="input-field col s6">
+								<i class="material-icons prefix">search</i>
+								<input id="page-discover-source-name" type="text">
+								<label for="page-discover-source-name">Source name</label>
+							</div>
+							<div class="input-field col s3">
+								<i class="material-icons prefix">location_on</i>
+								<input id="page-discover-source-country" type="text">
+								<label for="page-discover-source-country">Country</label>
+							</div>
+							<div class="input-field col s3">
+								<i class="material-icons prefix">language</i>
+								<input id="page-discover-source-language" type="text">
+								<label for="page-discover-source-language">Language</label>
+							</div>
+						</div>
+						<div class="card-container"></div>
+					</div>
+					<div id="page-discover-unofficial">
+						<h1>Unofficial feed setup</h1>
+
+					</div>
+				</div>
+
+
+			</div>
+			<!-- =========================================== -->
+			<div id="page-article">
+			</div>
+			<!-- =========================================== -->
+			<div id="page-404" class="center">
+				<h1>404 - Page not found</h1>
+			</div>
+		</main>
+
+
+		<div id="external-link-confirm" class="modal">
+			<div class="modal-content">
+				<h4><i class="material-icons">warning</i> External Link</h4>
+				<p>
+					The folling link will lead you to an another website.<br/>
+					This process can be <strong>detected</strong> and/or <strong>blocked</strong> by a third party.
+				</p>
+				<p>
+					Link target:<br/>
+					<code class="link-target truncate"></code>
+				</p>
+				<p class="http-warning red-text text-darken-2">
+					This target is not secured using HTTPS. <strong>All</strong> transmitted informations will be sent as <strong>plain text</strong>.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<a href="" class="follow-link-button modal-action orange darken-2 waves-effect waves-green btn-flat" target="_blank">Follow the link</a>
+				<a class="modal-action modal-close green waves-effect waves-green btn-flat">Back</a>
+			</div>
+		</div>
+
+		<script type='text/javascript' src='dist/bundle.js'></script>
+	</body>
+</html>
