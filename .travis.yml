@@ -1,0 +1,14 @@
+# Basic build & deploy to github pages to provide wip demos
+
+language: node_js
+node_js: 9
+cache: yarn
+
+dist: trusty
+
+script:
+  - yarn
+  - yarn build
+
+after_success:
+  - .travis/deploy-ghpages.sh
